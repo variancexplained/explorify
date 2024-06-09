@@ -4,25 +4,27 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /overview.py                                                                        #
+# Filename   : /explorify/eda/overview.py                                                          #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday June 8th 2024 10:54:53 am                                                  #
-# Modified   : Saturday June 8th 2024 11:27:54 am                                                  #
+# Modified   : Sunday June 9th 2024 03:20:13 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
 """Dataset Overview Module"""
 from functools import cache
+
 import pandas as pd
 
 from explorify.utils.print import Printer
 
 # ------------------------------------------------------------------------------------------------ #
+
 
 class Overview:
     """Provides an overview of a pandas DataFrame.
@@ -31,11 +33,13 @@ class Overview:
     about a DataFrame, such as its shape, memory usage, and column-specific details.
 
     Args:
-        data (pd.DataFrame): The DataFrame to analyze.
+        _data (pd.DataFrame): The DataFrame to analyze.
         printer_cls (type[Printer], optional): The Printer class to use for output. Defaults to Printer.
     """
 
-    def __init__(self, data: pd.DataFrame, printer_cls: type[Printer] = Printer) -> None:
+    def __init__(
+        self, data: pd.DataFrame, printer_cls: type[Printer] = Printer
+    ) -> None:
         """Initializes the Overview class with the given DataFrame and Printer class."""
         self._data = data
         self._printer = printer_cls()
@@ -52,7 +56,9 @@ class Overview:
         summary = {
             "Rows": self._data.shape[0],
             "Columns": self._data.shape[1],
-            "Size (Mb)": round(self._data.memory_usage(deep=True).sum() / (1024*1024), 2)
+            "Size (Mb)": round(
+                self._data.memory_usage(deep=True).sum() / (1024 * 1024), 2
+            ),
         }
         self._printer.print_dict(data=summary, title="Dataset Summary")
 

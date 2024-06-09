@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday April 25th 2024 12:55:55 am                                                #
-# Modified   : Sunday June 9th 2024 12:33:22 pm                                                    #
+# Modified   : Sunday June 9th 2024 04:18:09 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -25,6 +25,7 @@ import pandas as pd
 import pytest
 
 from explorify import DataClass
+from explorify.container import VisualizeContainer
 from explorify.utils.io import IOService
 
 # ------------------------------------------------------------------------------------------------ #
@@ -79,3 +80,15 @@ def credit():
         }
     )
     return df
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                              DEPENDENCY INJECTION                                                #
+# ------------------------------------------------------------------------------------------------ #
+@pytest.fixture(scope="module", autouse=True)
+def container():
+    container = VisualizeContainer()
+    container.init_resources()
+    container.wire(packages=["explorify.eda"])
+
+    return container

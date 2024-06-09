@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Friday September 29th 2023 11:52:02 pm                                              #
-# Modified   : Sunday June 9th 2024 02:46:41 pm                                                    #
+# Modified   : Sunday June 9th 2024 04:27:48 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -55,7 +55,7 @@ class KendallsTau(StatTestResult):
 
     def plot(self) -> None:  # pragma: no cover
         self.visualizer.kendallstau(
-            data=self.data,
+            data=self._data,
             a=self.a,
             b=self.b,
             value=self.value,
@@ -74,7 +74,7 @@ class KendallsTauAnalysis(StatAnalysis):
     """Kendall's Tau Measures the degree of correlation between two ordinal variables.
 
     Args:
-        data (pd.DataFrame): The DataFrame containing the variables of interest.
+        _data (pd.DataFrame): The DataFrame containing the variables of interest.
         a (str): The name of an ordinal variable in data.
         b (str): The name of an ordinal variable in data.
 
@@ -190,7 +190,7 @@ class CramersVAnalysis(StatAnalysis):
     The CramersVAnalysis class provides the association between two nominal variables.
 
     Args:
-        data (pd.DataFrame): The DataFrame containing the variables of interest.
+        _data (pd.DataFrame): The DataFrame containing the variables of interest.
         x (str): The name of the independent variable in data.
         y (str): The name of the dependent variable in data.
         alpha (float): The level of significance for the independence hypothesis test. Default = 0.05

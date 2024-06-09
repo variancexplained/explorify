@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday May 27th 2023 08:56:02 pm                                                  #
-# Modified   : Sunday June 9th 2024 11:25:51 am                                                    #
+# Modified   : Sunday June 9th 2024 03:20:16 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -729,7 +729,7 @@ class RVSDistribution:
     matches an hypothesized distribution.
 
     Args:
-        data (pd.DataFrame): Data from which distribution parameters are estimated.
+        _data (pd.DataFrame): Data from which distribution parameters are estimated.
     """
 
     __DISTRIBUTIONS = {

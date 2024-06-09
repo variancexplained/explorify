@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday June 7th 2023 08:15:08 pm                                                 #
-# Modified   : Sunday June 9th 2024 02:19:16 pm                                                    #
+# Modified   : Sunday June 9th 2024 03:20:17 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -53,7 +53,7 @@ class PearsonCorrelationResult(StatTestResult):
         self.visualizer = visualizer
 
     def plot(self) -> None:  # pragma: no cover
-        self.visualizer.regplot(data=self.data, x=self.a, y=self.b, title=self.result)
+        self.visualizer.regplot(data=self._data, x=self.a, y=self.b, title=self.result)
 
     def report(self) -> str:
         return f"Pearson Correlation Test\nr({self.dof})={round(self.value,2)}, {self._report_pvalue(self.pvalue)}"
@@ -78,7 +78,7 @@ class PearsonCorrelationTest(StatisticalTest):
     that have a Pearson correlation at least as extreme as the one computed from these datasets.
 
     Args:
-        data (pd.DataFrame): DataFrame containing at least two variables. Optional
+        _data (pd.DataFrame): DataFrame containing at least two variables. Optional
         a (str): Keys in the DataFrame.
         b (str): Keys in the DataFrame.
         alpha (float): The test significance level. Default=0.05
@@ -200,7 +200,7 @@ class SpearmanCorrelationResult(StatTestResult):
         self.visualizer = visualizer
 
     def plot(self) -> None:  # pragma: no cover
-        self.visualizer.regplot(data=self.data, x=self.a, y=self.b, title=self.result)
+        self.visualizer.regplot(data=self._data, x=self.a, y=self.b, title=self.result)
 
     def report(self) -> str:
         return f"Spearman Correlation Test\nr({self.dof})={round(self.value,3)}, {self._report_pvalue(self.pvalue)}"

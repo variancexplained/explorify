@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday August 26th 2023 06:25:27 am                                               #
-# Modified   : Sunday June 9th 2024 02:42:41 pm                                                    #
+# Modified   : Sunday June 9th 2024 03:20:16 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -1417,7 +1417,7 @@ class Visualizer(VisualizerABC):  # pragma: no cover
         """Plot rectangular data as a color-encoded matrix.
 
         Args:
-            data (pd.DataFrame): 2D Dataset that can be coerced into an ndarray.
+            _data (pd.DataFrame): 2D Dataset that can be coerced into an ndarray.
                 If a Pandas DataFrame is provided, the index/column information
                 will be used to label the columns and rows
             vmin, vmax: Values to anchor the colormap, otherwise they are inferred from the data and other keyword arguments.

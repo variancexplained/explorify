@@ -4,26 +4,28 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /categorical.py                                                                     #
+# Filename   : /explorify/eda/univariate/categorical.py                                            #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday June 8th 2024 11:45:10 am                                                  #
-# Modified   : Saturday June 8th 2024 05:04:56 pm                                                  #
+# Modified   : Sunday June 9th 2024 03:20:13 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
-import pandas as pd
 import numpy as np
+import pandas as pd
+
+
 # ------------------------------------------------------------------------------------------------ #
 class Categorical:
     """Provides methods to perform univariate analysis on categorical data.
 
     Args:
-        data (pd.DataFrame): The DataFrame containing the categorical data.
+        _data (pd.DataFrame): The DataFrame containing the categorical data.
 
     Example usage:
         >>> import pandas as pd
@@ -144,10 +146,12 @@ class Categorical:
             n = len(series)
             return 1 - sum((counts / n) ** 2)
 
-        indices = pd.Series({
-            'Shannon Entropy': shannon_entropy(self._data[x]),
-            'Simpson Index': simpson_index(self._data[x])
-        })
+        indices = pd.Series(
+            {
+                "Shannon Entropy": shannon_entropy(self._data[x]),
+                "Simpson Index": simpson_index(self._data[x]),
+            }
+        )
         return indices
 
     def inequality_measures(self, x: str) -> pd.Series:
@@ -169,9 +173,7 @@ class Categorical:
             gini = 1 - (2 * cum_counts - sorted_counts).sum() / (n * counts.sum())
             return gini
 
-        measures = pd.Series({
-            'Gini Coefficient': gini_coefficient(self._data[x])
-        })
+        measures = pd.Series({"Gini Coefficient": gini_coefficient(self._data[x])})
         return measures
 
     def entropy(self, x: str) -> pd.Series:
@@ -190,9 +192,7 @@ class Categorical:
             probs = counts / len(series)
             return -sum(probs * np.log2(probs))
 
-        entropy_value = pd.Series({
-            'Entropy': shannon_entropy(self._data[x])
-        })
+        entropy_value = pd.Series({"Entropy": shannon_entropy(self._data[x])})
         return entropy_value
 
     def spread_measures(self, x: str) -> pd.Series:
@@ -206,11 +206,13 @@ class Categorical:
         """
         self._validate_column(x)
 
-        spread_value = pd.Series({
-            'Spread': self._data[x].value_counts().max() - self._data[x].value_counts().min()
-        })
+        spread_value = pd.Series(
+            {
+                "Spread": self._data[x].value_counts().max()
+                - self._data[x].value_counts().min()
+            }
+        )
         return spread_value
-
 
     def _validate_column(self, x: str) -> None:
         """Validates the column to ensure it exists and is of type object, category, or string.
@@ -223,7 +225,11 @@ class Categorical:
         """
         if x not in self._data.columns:
             raise ValueError(f"Column '{x}' not found in data.")
-        if not (isinstance(self._data[x], pd.CategoricalDtype) or
-                pd.api.types.is_object_dtype(self._data[x]) or
-                pd.api.types.is_string_dtype(self._data[x])):
-            raise ValueError(f"Column '{x}' must be of type category, object, or string.")
+        if not (
+            isinstance(self._data[x], pd.CategoricalDtype)
+            or pd.api.types.is_object_dtype(self._data[x])
+            or pd.api.types.is_string_dtype(self._data[x])
+        ):
+            raise ValueError(
+                f"Column '{x}' must be of type category, object, or string."
+            )

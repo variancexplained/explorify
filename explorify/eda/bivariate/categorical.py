@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Sunday June 9th 2024 10:52:53 am                                                    #
-# Modified   : Sunday June 9th 2024 02:51:12 pm                                                    #
+# Modified   : Sunday June 9th 2024 03:20:14 pm                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -39,7 +39,7 @@ class CategoricalBivariateAnalysis(ABC):
     Base class for categorical-to-categorical bivariate analysis.
 
     Args:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
         cramers_analysis_cls (Type[CramersVAnalysis]): The class for conducting Cramér's V analysis.
         chisquare_analysis_cls (Type[ChiSquareAnalysis]): The class for conducting chi-square analysis.
 
@@ -57,7 +57,7 @@ class CategoricalBivariateAnalysis(ABC):
     ):
         """
         Initializes the CategoricalBivariateAnalysis instance."""
-        self.data = data
+        self._data = data
         self.cramers_analysis_cls = cramers_analysis_cls
         self.chisquare_test_cls = chisquare_test_cls
 
@@ -77,15 +77,15 @@ class CategoricalBivariateAnalysis(ABC):
         ValueError
             If the input variables are not in the DataFrame or are numeric.
         """
-        if var1 not in self.data.columns or var2 not in self.data.columns:
+        if var1 not in self._data.columns or var2 not in self._data.columns:
             raise ValueError(
                 f"Variables '{var1}' and/or '{var2}' are not in the DataFrame."
             )
 
-        if pd.api.types.is_numeric_dtype(self.data[var1]):
+        if pd.api.types.is_numeric_dtype(self._data[var1]):
             raise ValueError(f"Variable '{var1}' is numeric and not categorical.")
 
-        if pd.api.types.is_numeric_dtype(self.data[var2]):
+        if pd.api.types.is_numeric_dtype(self._data[var2]):
             raise ValueError(f"Variable '{var2}' is numeric and not categorical.")
 
     def contingency_table(self, var1: str, var2: str) -> pd.DataFrame:
@@ -105,7 +105,7 @@ class CategoricalBivariateAnalysis(ABC):
             Contingency table of the two variables.
         """
         self.validate_input(var1, var2)
-        return pd.crosstab(self.data[var1], self.data[var2])
+        return pd.crosstab(self._data[var1], self._data[var2])
 
     def chi_square(self, var1: str, var2: str) -> StatTestResult:
         """
@@ -124,7 +124,7 @@ class CategoricalBivariateAnalysis(ABC):
             Chi-square statistic and p-value of the test.
         """
         self.validate_input(var1, var2)
-        analysis = self.chisquare_test_cls(data=self.data, a=var1, b=var2)
+        analysis = self.chisquare_test_cls(data=self._data, a=var1, b=var2)
         analysis.run()
         return analysis.result
 
@@ -145,7 +145,7 @@ class CategoricalBivariateAnalysis(ABC):
             Cramér's V statistic.
         """
         self.validate_input(var1, var2)
-        analysis = self.cramers_analysis_cls(self.data, a=var1, b=var2)
+        analysis = self.cramers_analysis_cls(self._data, a=var1, b=var2)
         analysis.run()
         return analysis.result
 
@@ -166,7 +166,7 @@ class CategoricalBivariateAnalysis(ABC):
             Mutual information score.
         """
         self.validate_input(var1, var2)
-        return mutual_info_score(self.data[var1], self.data[var2])
+        return mutual_info_score(self._data[var1], self._data[var2])
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -179,10 +179,10 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
     Inherits from CategoricalBivariateAnalysis.
 
     Args:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
 
     Attributes:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
 
     Methods:
         phi_coefficient(var1: str, var2: str) -> float:
@@ -198,7 +198,7 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
         Initializes the NominalNominalBivariateAnalysis instance.
 
         Args:
-            data (pd.DataFrame): The input data containing the variables.
+            _data (pd.DataFrame): The input data containing the variables.
         """
         super().__init__(data=data)
 
@@ -221,7 +221,7 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
             )
 
         chi2, _, _, _ = stats.chi2_contingency(contingency_table)
-        n = self.data.shape[0]
+        n = self._data.shape[0]
         return np.sqrt(chi2 / n)
 
     def contingency_coefficient(self, var1: str, var2: str) -> float:
@@ -238,7 +238,7 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
         self.validate_input(var1, var2)
         contingency_table = self.contingency_table(var1, var2)
         chi2, _, _, _ = stats.chi2_contingency(contingency_table)
-        n = self.data.shape[0]
+        n = self._data.shape[0]
         return np.sqrt(chi2 / (chi2 + n))
 
     def lambda_coefficient(self, var1: str, var2: str) -> float:
@@ -255,7 +255,7 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
         self.validate_input(var1, var2)
         contingency_table = self.contingency_table(var1, var2)
         chi2, _, _, _ = stats.chi2_contingency(contingency_table)
-        n = self.data.shape[0]
+        n = self._data.shape[0]
         return np.sqrt(chi2 / (n * min(contingency_table.shape)))
 
 
@@ -269,10 +269,10 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
     Inherits from CategoricalBivariateAnalysis.
 
     Args:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
 
     Attributes:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
 
     Methods:
         gamma(var1: str, var2: str) -> float:
@@ -288,7 +288,7 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         Initializes the NominalOrdinalBivariateAnalysis instance.
 
         Args:
-            data (pd.DataFrame): The input data containing the variables.
+            _data (pd.DataFrame): The input data containing the variables.
         """
         super().__init__(data=data)
 
@@ -304,10 +304,10 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
             pd.DataFrame: Contingency table of the two variables.
         """
         # Sort the ordinal variable values
-        sorted_ordinal_values = self.data[var2].sort_values()
+        sorted_ordinal_values = self._data[var2].sort_values()
 
         # Create a contingency table using the nominal variable and sorted ordinal values
-        return pd.crosstab(self.data[var1], sorted_ordinal_values)
+        return pd.crosstab(self._data[var1], sorted_ordinal_values)
 
     def gamma(self, var1: str, var2: str) -> float:
         """
@@ -326,17 +326,19 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         contingency_table = self.contingency_table(var1, var2)
 
         # Compute the ranks for the ordinal variable
-        ranks = self.data[var2].rank(method="dense")
+        ranks = self._data[var2].rank(method="dense")
 
         # Calculate the differences in ranks for concordant and discordant pairs
         concordant_pairs = 0
         discordant_pairs = 0
-        for i in range(len(self.data)):
-            for j in range(i + 1, len(self.data)):
-                if self.data[var1][i] != self.data[var1][j]:
+        for i in range(len(self._data)):
+            for j in range(i + 1, len(self._data)):
+                if self._data[var1][i] != self._data[var1][j]:
                     if (ranks[i] - ranks[j]) * (
-                        contingency_table.loc[self.data[var1][i], self.data[var2][j]]
-                        - contingency_table.loc[self.data[var1][j], self.data[var2][i]]
+                        contingency_table.loc[self._data[var1][i], self._data[var2][j]]
+                        - contingency_table.loc[
+                            self._data[var1][j], self._data[var2][i]
+                        ]
                     ) > 0:
                         concordant_pairs += 1
                     else:
@@ -398,8 +400,8 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         """
         self.validate_input(var1, var2)
         # Calculate the marginal probabilities
-        p_x = self.data[var1].value_counts(normalize=True)
-        p_y_given_x = self.data.groupby(var1)[var2].value_counts(normalize=True)
+        p_x = self._data[var1].value_counts(normalize=True)
+        p_y_given_x = self._data.groupby(var1)[var2].value_counts(normalize=True)
 
         # Compute Theil's U coefficient
         u = 0
@@ -421,10 +423,10 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
     Inherits from CategoricalBivariateAnalysis.
 
     Args:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
 
     Attributes:
-        data (pd.DataFrame): The input data containing the variables.
+        _data (pd.DataFrame): The input data containing the variables.
 
     Methods:
         contingency_table(var1: str, var2: str) -> pd.DataFrame:
@@ -451,7 +453,7 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         Initializes the OrdinalOrdinalBivariateAnalysis instance.
 
         Args:
-            data (pd.DataFrame): The input data containing the variables.
+            _data (pd.DataFrame): The input data containing the variables.
         """
         super().__init__(data=data)
         self.kendalls_tau_cls = kendalls_tau_cls
@@ -469,8 +471,8 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
             pd.DataFrame: Contingency table of the two variables.
         """
         # Sort both ordinal variables
-        sorted_var1 = self.data[var1].sort_values()
-        sorted_var2 = self.data[var2].sort_values()
+        sorted_var1 = self._data[var1].sort_values()
+        sorted_var2 = self._data[var2].sort_values()
 
         # Create a contingency table using the sorted ordinal variables
         return pd.crosstab(sorted_var1, sorted_var2)
@@ -490,7 +492,7 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         """
         self.validate_input(var1, var2)
         analysis = self.cramers_analysis_cls(
-            data=self.data, a=var1, b=var2, ordinal_a=True, ordinal_b=True
+            data=self._data, a=var1, b=var2, ordinal_a=True, ordinal_b=True
         )
         analysis.run()
         return analysis.result
@@ -509,8 +511,8 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         self.validate_input(var1, var2)
 
         # Sort both ordinal variables
-        sorted_var1 = self.data[var1].sort_values()
-        sorted_var2 = self.data[var2].sort_values()
+        sorted_var1 = self._data[var1].sort_values()
+        sorted_var2 = self._data[var2].sort_values()
 
         # Compute ranks for both ordinal variables
         ranks_var1 = sorted_var1.rank(method="dense")
@@ -519,8 +521,8 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         # Calculate the differences in ranks for concordant and discordant pairs
         concordant_pairs = 0
         discordant_pairs = 0
-        for i in range(len(self.data)):
-            for j in range(i + 1, len(self.data)):
+        for i in range(len(self._data)):
+            for j in range(i + 1, len(self._data)):
                 if (
                     sorted_var1.iloc[i] != sorted_var1.iloc[j]
                     and sorted_var2.iloc[i] != sorted_var2.iloc[j]
@@ -551,7 +553,7 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         """
         self.validate_input(var1, var2)
         analysis = self.kendalls_tau_cls(
-            data=self.data, a=var1, b=var2, ordinal_a=True, ordinal_b=True
+            data=self._data, a=var1, b=var2, ordinal_a=True, ordinal_b=True
         )
         analysis.run()
         return analysis.result
@@ -568,7 +570,7 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
             float: Spearman's Rank Correlation coefficient.
         """
         self.validate_input(var1, var2)
-        analysis = self.spearmans_rank_cls(data=self.data, a=var1, b=var2)
+        analysis = self.spearmans_rank_cls(data=self._data, a=var1, b=var2)
         analysis.run()
         return analysis.result
 
@@ -588,8 +590,8 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         self.validate_input(var1, var2)
 
         # Assign ranks to the ordinal values
-        ranks_var1 = self.data[var1].rank(method="dense")
-        ranks_var2 = self.data[var2].rank(method="dense")
+        ranks_var1 = self._data[var1].rank(method="dense")
+        ranks_var2 = self._data[var2].rank(method="dense")
 
         # Compute mutual information using ranked variables
         mutual_info = mutual_info_score(ranks_var1, ranks_var2)
