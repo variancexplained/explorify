@@ -1,0 +1,18 @@
+{
+  "template": "https://github.com/woltapp/wolt-python-package-cookiecutter",
+  "commit": "7cf131315aae15890e44411c9fcecdbb584dca48",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "author_name": "John James",
+      "author_email": "john@variancexplained.com",
+      "github_username": "variancexplained",
+      "project_name": "Explorify",
+      "project_slug": "explorify",
+      "package_name": "explorify",
+      "project_short_description": "Explorify: Your modular solution for comprehensive data exploration. Dive deep with a suite of statistical techniques, tests, and visualizations designed for flexibility and ease of use.",
+      "_template": "https://github.com/woltapp/wolt-python-package-cookiecutter"
+    }
+  },
+  "directory": null
+}

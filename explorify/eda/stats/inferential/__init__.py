@@ -3,16 +3,16 @@
 # ================================================================================================ #
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
-# Python     : 3.10.12                                                                             #
-# Filename   : /explorify/eda/__init__.py                                                          #
+# Python     : 3.10.11                                                                             #
+# Filename   : /explorify/eda/stats/inferential/__init__.py                                        #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
-# Email      : john@variancexplained.com                                                           #
+# Email      : john.james.ai.studio@gmail.com                                                      #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Saturday June 8th 2024 10:18:17 am                                                  #
-# Modified   : Sunday June 9th 2024 10:52:22 am                                                    #
+# Created    : Sunday May 28th 2023 01:21:49 pm                                                    #
+# Modified   : Sunday June 9th 2024 11:25:55 am                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
-# Copyright  : (c) 2024 John James                                                                 #
+# Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #

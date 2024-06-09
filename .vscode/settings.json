@@ -1,0 +1,10 @@
+{
+    "psi-header.variables":
+        [
+            ["projectCreationYear", "2024"],
+            ["url", "https://github.com/variancexplained/explorify"],
+            ["projectname", "Explorify"],
+            ["version", "0.1.0"],
+            ["pythonversion","3.10.12"]
+        ],
+}

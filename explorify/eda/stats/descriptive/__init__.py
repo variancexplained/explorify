@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 # ================================================================================================ #
-# Project    : Explorify                                                                           #
+# Project    : Artificial Intelligence & Data Science Studio                                       #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /explorify/eda/__init__.py                                                          #
+# Filename   : /studioai/stats/__init__.py                                                         #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
-# Email      : john@variancexplained.com                                                           #
-# URL        : https://github.com/variancexplained/explorify                                       #
+# Email      : john.james.ai.studio@gmail.com                                                      #
+# URL        : https://github.com/john-james-ai/studioai                                           #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Saturday June 8th 2024 10:18:17 am                                                  #
-# Modified   : Sunday June 9th 2024 10:52:22 am                                                    #
+# Created    : Tuesday August 22nd 2023 06:28:52 pm                                                #
+# Modified   : Tuesday August 22nd 2023 06:28:55 pm                                                #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
-# Copyright  : (c) 2024 John James                                                                 #
+# Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #

@@ -5,7 +5,6 @@
 [![PyPI - License](https://img.shields.io/pypi/l/explorify?style=flat-square)](https://pypi.python.org/pypi/explorify/)
 [![Coookiecutter - Wolt](https://img.shields.io/badge/cookiecutter-Wolt-00c2e8?style=flat-square&logo=cookiecutter&logoColor=D4AA00&link=https://github.com/woltapp/wolt-python-package-cookiecutter)](https://github.com/woltapp/wolt-python-package-cookiecutter)
 
-
 ---
 
 **Documentation**: [https://variancexplained.github.io/explorify](https://variancexplained.github.io/explorify)
@@ -87,5 +86,3 @@ pre-commit run --all-files
 ```
 
 ---
-
-This project was generated using the [wolt-python-package-cookiecutter](https://github.com/woltapp/wolt-python-package-cookiecutter) template.

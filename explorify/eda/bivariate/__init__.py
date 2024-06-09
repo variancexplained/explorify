@@ -4,14 +4,14 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /explorify/eda/__init__.py                                                          #
+# Filename   : /explorify/eda/bivariate/__init__.py                                                #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Saturday June 8th 2024 10:18:17 am                                                  #
-# Modified   : Sunday June 9th 2024 10:52:22 am                                                    #
+# Created    : Sunday June 9th 2024 10:52:09 am                                                    #
+# Modified   : Sunday June 9th 2024 10:52:13 am                                                    #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
