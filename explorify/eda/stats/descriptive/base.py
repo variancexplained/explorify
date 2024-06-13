@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Tuesday August 22nd 2023 09:03:39 pm                                                #
-# Modified   : Sunday June 9th 2024 02:42:38 pm                                                    #
+# Modified   : Thursday June 13th 2024 02:54:51 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -52,7 +52,7 @@ class DescriptiveStats(ABC):
             include Union[str, list[str]]):
                 A white list of data types to include in the result. Ignored for Series.
                 Here are the options:
-                - ‘all' : All columns of the input will be included in the output.
+                - 'all' : All columns of the input will be included in the output.
                 - A list-like of dtypes : Limits the results to the provided data types.
                     To limit the result to numeric types submit numpy.number.
                     To limit it instead to object columns submit the numpy.object data type.

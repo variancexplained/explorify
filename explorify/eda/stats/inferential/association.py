@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Friday September 29th 2023 11:52:02 pm                                              #
-# Modified   : Sunday June 9th 2024 04:27:48 pm                                                    #
+# Modified   : Thursday June 13th 2024 11:11:03 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -37,11 +37,11 @@ from explorify.eda.visualize.visualizer import Visualizer
 #                                 KENDALL'S TAU MEASURE OF CORRELATION                             #
 # ------------------------------------------------------------------------------------------------ #
 @dataclass
-class KendallsTau(StatTestResult):
+class KendallsTauTestResult(StatTestResult):
     name: str = f"Kendall's \u03c4"  # noqa
     data: pd.DataFrame = None
-    a: str = None
-    b: str = None
+    a_name: str = None
+    b_name: str = None
     n: int = None
     strength: str = None
     pvalue: float = None
@@ -56,25 +56,38 @@ class KendallsTau(StatTestResult):
     def plot(self) -> None:  # pragma: no cover
         self.visualizer.kendallstau(
             data=self._data,
-            a=self.a,
-            b=self.b,
+            a_name=self.a_name,
+            b_name=self.b_name,
             value=self.value,
             thresholds=self.thresholds,
             interpretation=self.interpretation,
         )
 
+    @property
     def report(self) -> str:
-        return f"Kendall's Tau Test of Association between {self.a.capitalize()} and {self.b.capitalize()} \u03C4={round(self.value,2)},{self._report_pvalue(self.pvalue)}."
+        significance = (
+            "yet, non significant" if self.value > self.alpha else "and significant"
+        )
+        result = f"A Kendall's Tau Test was conducted to measure the strength of correlation between {self.a_name.capitalize()} and {self.b_name.capitalize()}."
+        result += rf"The $t_b$ was {self._report_statistic(self.value)}, {self._report_pvalue(self.pvalue)} suggesting a {self.strength} {significance} correlation between {self.a_name.capitalize()} and {self.b_name.capitalize()}."
+        return result
 
 
 # ------------------------------------------------------------------------------------------------ #
 #                                   CRAMERS V ANALYSIS                                             #
 # ------------------------------------------------------------------------------------------------ #
-class KendallsTauAnalysis(StatAnalysis):
-    """Kendall's Tau Measures the degree of correlation between two ordinal variables.
+class KendallsTauTest(StatAnalysis):
+    """Calculate Kendall's tau, a correlation measure for ordinal data.
+
+    Kendall's tau is a measure of the correspondence between two rankings. Values close to 1 indicate
+    strong agreement, and values close to -1 indicate strong disagreement. This implements two
+    variants of Kendall's tau: tau-b (the default) and tau-c (also known as Stuart's tau-c).
+    These differ only in how they are normalized to lie within the range -1 to 1; the hypothesis
+    tests (their p-values) are identical. Kendall's original tau-a is not implemented separately
+    because both tau-b and tau-c reduce to tau-a in the absence of ties.
 
     Args:
-        _data (pd.DataFrame): The DataFrame containing the variables of interest.
+        data (pd.DataFrame): The DataFrame containing the variables of interest.
         a (str): The name of an ordinal variable in data.
         b (str): The name of an ordinal variable in data.
 
@@ -86,8 +99,8 @@ class KendallsTauAnalysis(StatAnalysis):
     def __init__(
         self,
         data: pd.DataFrame,
-        a: str = None,
-        b: str = None,
+        a_name: str = None,
+        b_name: str = None,
         variant: str = "c",
         alternative: str = "two-sided",
         ordinal_a: bool = False,
@@ -95,8 +108,8 @@ class KendallsTauAnalysis(StatAnalysis):
     ) -> None:
         super().__init__()
         self._data = data
-        self._a = a
-        self._b = b
+        self._a_name = a_name
+        self._b_name = b_name
         self._variant = variant
         self._alternative = alternative
         self._ordinal_a = ordinal_a
@@ -112,7 +125,7 @@ class KendallsTauAnalysis(StatAnalysis):
         ]
 
     @property
-    def result(self) -> KendallsTau:
+    def result(self) -> KendallsTauTestResult:
         """Returns the Cramer's V Measure object."""
         return self._result
 
@@ -121,12 +134,12 @@ class KendallsTauAnalysis(StatAnalysis):
         data = self._data.copy()
 
         if self._ordinal_a:
-            data[self._a] = data[self._a].sort_values()
+            data[self._a_name] = data[self._a_name].sort_values()
         if self._ordinal_b:
-            data[self._b] = data[self._b].sort_values()
+            data[self._b_name] = data[self._b_name].sort_values()
 
-        a = data[self._a].values
-        b = data[self._b].values
+        a = data[self._a_name].values
+        b = data[self._b_name].values
 
         statistic, pvalue = stats.kendalltau(
             x=a, y=b, variant=self._variant, alternative=self._alternative
@@ -135,10 +148,10 @@ class KendallsTauAnalysis(StatAnalysis):
         strength = self._labels[np.argmax(np.where(self._thresholds < statistic))]
 
         # Create the result object.
-        self._result = KendallsTau(
+        self._result = KendallsTauTestResult(
             data=data,
-            a=self._a,
-            b=self._b,
+            a_name=self._a_name,
+            b_name=self._b_name,
             n=len(a),
             value=statistic,
             strength=strength,
@@ -159,8 +172,8 @@ class CramersV(StatTestResult):
     name: str = "Cramer's V"
     strength: str = None
     data: pd.DataFrame = None
-    a: str = None
-    b: str = None
+    a_name: str = None
+    b_name: str = None
     n: int = None
     dof: int = None
     x2alpha: float = None
@@ -177,8 +190,16 @@ class CramersV(StatTestResult):
     ) -> None:
         self.visualizer = visualizer
 
+    @property
     def report(self) -> str:
-        return f"(X\u00b2 ({self.dof}, n={self.data.shape[0]})={round(self.value,2)}, {self._report_pvalue(self.pvalue)}, phi={round(self.value,2)}."
+        direction = "above" if self.x2 > self.alpha else "below"
+        x2significance = "non significant" if self.x2 > self.alpha else "significant"
+        cvsignificance = "non significant" if self.value > self.alpha else "significant"
+        result = f"A X\u00b2 Test of Independence was conducted to measure the strength of association between {self.a_name.capitalize()} and {self.b_name.capitalize()}."
+        result += f"The X\u00b2 was {self._report_statistic(self.x2)}, {direction} the alpha level of {self.alpha}, suggesting a {x2significance} association between {self.a_name.capitalize()} and {self.b_name.capitalize()}."
+        result += f"Additionally, an effect size was calculated using Cramer's V, which was found to be {self._report_statistic(self.value)}."
+        result += f"A {cvsignificance} result of {self.strength} in magnitude."
+        return result
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -190,7 +211,8 @@ class CramersVAnalysis(StatAnalysis):
     The CramersVAnalysis class provides the association between two nominal variables.
 
     Args:
-        _data (pd.DataFrame): The DataFrame containing the variables of interest.
+        data (pd.DataFrame): The DataFrame containing the variables of interest.
+        a_name (str): Name of the nominal
         x (str): The name of the independent variable in data.
         y (str): The name of the dependent variable in data.
         alpha (float): The level of significance for the independence hypothesis test. Default = 0.05
@@ -202,17 +224,19 @@ class CramersVAnalysis(StatAnalysis):
     def __init__(
         self,
         data: pd.DataFrame,
-        a: str = None,
-        b: str = None,
+        a_name: str = None,
+        b_name: str = None,
         alpha: float = 0.05,
+        correction: bool = True,
         ordinal_a: bool = False,
         ordinal_b: bool = False,
     ) -> None:
         super().__init__()
         self._data = data
-        self._a = a
-        self._b = b
+        self._a_name = a_name
+        self._b_name = b_name
         self._alpha = alpha
+        self._correction = correction
         self._ordinal_a = ordinal_a
         self._ordinal_b = ordinal_b
         self._thresholds = {
@@ -240,18 +264,18 @@ class CramersVAnalysis(StatAnalysis):
         data = self._data.copy()
 
         if self._ordinal_a:
-            data[self._a] = data[self._a].sort_values()
+            data[self._a_name] = data[self._a_name].sort_values()
         if self._ordinal_b:
-            data[self._b] = data[self._b].sort_values()
+            data[self._b_name] = data[self._b_name].sort_values()
 
-        crosstab = pd.crosstab(data[self._a], data[self._b])
+        crosstab = pd.crosstab(data[self._a_name], data[self._b_name])
 
         statistic, pvalue, x2dof, exp = stats.chi2_contingency(crosstab.values)
 
         dof = min(crosstab.shape[0], crosstab.shape[1]) - 1
 
         cv = stats.contingency.association(
-            crosstab.values, method="cramer", correction=True
+            crosstab.values, method="cramer", correction=self._correction
         )
 
         revised_dof = np.min(np.array([dof, 10]))
@@ -263,8 +287,8 @@ class CramersVAnalysis(StatAnalysis):
         # Create the result object.
         self._result = CramersV(
             data=crosstab,
-            a=self._a,
-            b=self._b,
+            a_name=self._a_name,
+            b_name=self._b_name,
             dof=dof,
             value=cv,
             strength=strength,

@@ -4,13 +4,13 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.10                                                                             #
-# Filename   : /tests/test_stats/test_inferential/test_cramers_v.py                                #
+# Filename   : /tests/test_stats/test_inferential/test_point_biserial_correlation.py               #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john.james.ai.studio@gmail.com                                                      #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Monday June 5th 2023 09:32:36 pm                                                    #
+# Created    : Wednesday June 7th 2023 09:15:17 pm                                                 #
 # Modified   : Thursday June 13th 2024 11:23:28 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
@@ -20,10 +20,12 @@ import inspect
 import logging
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import pytest
 
-from explorify.eda.stats.inferential.association import CramersVAnalysis
+from explorify.eda.stats.inferential.base import StatTestProfile
+from explorify.eda.stats.inferential.correlation import PearsonCorrelationTest
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -33,11 +35,11 @@ single_line = f"\n{100 * '-'}"
 
 
 @pytest.mark.stats
-@pytest.mark.ind
-@pytest.mark.cramersv
-class TestCramersV:  # pragma: no cover
+@pytest.mark.corr
+@pytest.mark.biserial
+class TestPointBiserialCorrelationTest:  # pragma: no cover
     # ============================================================================================ #
-    def test_cramers_v(self, credit, caplog):
+    def test_positive(self, credit, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -49,15 +51,20 @@ class TestCramersV:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = CramersVAnalysis(data=credit, a_name="Gender", b_name="Education")
+        df = credit
+        df["Male"] = np.where(df["Gender"] == "Male", True, False)
+
+        test = PearsonCorrelationTest(data=df, a_name="Male", b_name="Income")
         test.run()
-        result = test.result
-        assert isinstance(result.value, float)
-        assert isinstance(result.pvalue, float)
-        assert result.x2alpha == 0.05
-        assert isinstance(result.data, pd.DataFrame)
-        logging.debug(result)
-        logging.debug(result.report)
+        assert "Pearson" in test.result.name
+        assert isinstance(test.result.H0, str)
+        assert isinstance(test.result.value, float)
+        assert isinstance(test.result.pvalue, float)
+        assert test.result.alpha == 0.05
+        assert isinstance(test.result.report, str)
+        assert isinstance(test.result.data, pd.DataFrame)
+        assert isinstance(test.profile, StatTestProfile)
+        logging.debug(test.result)
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
@@ -75,7 +82,7 @@ class TestCramersV:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_cramers_v_ordinal(self, credit, caplog):
+    def test_negative(self, credit, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -87,21 +94,54 @@ class TestCramersV:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = CramersVAnalysis(
-            data=credit,
-            a_name="Gender",
-            b_name="Education",
-            ordinal_a=True,
-            ordinal_b=True,
-        )
+        a = np.linspace(10, 100, 100)
+        b = np.linspace(100, 10, 100)
+        d = {"sample a": a, "sample b": b}
+        df = pd.DataFrame(d)
+        test = PearsonCorrelationTest(data=df, a_name="sample a", b_name="sample b")
         test.run()
-        result = test.result
-        assert isinstance(result.value, float)
-        assert isinstance(result.pvalue, float)
-        assert result.x2alpha == 0.05
-        assert isinstance(result.data, pd.DataFrame)
-        logging.debug(result)
-        logging.debug(result.report)
+        assert "Pearson" in test.result.name
+        assert isinstance(test.result.H0, str)
+        assert isinstance(test.result.value, float)
+        assert isinstance(test.result.pvalue, float)
+        assert test.result.alpha == 0.05
+        assert isinstance(test.result.report, str)
+        assert isinstance(test.result.data, pd.DataFrame)
+        assert isinstance(test.profile, StatTestProfile)
+        logging.debug(test.result)
+
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            "\nCompleted {} {} in {} seconds at {} on {}".format(
+                self.__class__.__name__,
+                inspect.stack()[0][3],
+                duration,
+                end.strftime("%I:%M:%S %p"),
+                end.strftime("%m/%d/%Y"),
+            )
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_invalid_args(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            "\n\nStarted {} {} at {} on {}".format(
+                self.__class__.__name__,
+                inspect.stack()[0][3],
+                start.strftime("%I:%M:%S %p"),
+                start.strftime("%m/%d/%Y"),
+            )
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        b = np.linspace(100, 10, 100)
+        with pytest.raises(TypeError):
+            test = PearsonCorrelationTest(b=b)
+            test.run()
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()

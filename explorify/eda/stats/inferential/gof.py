@@ -11,15 +11,14 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Tuesday June 6th 2023 01:45:05 am                                                   #
-# Modified   : Sunday June 9th 2024 11:31:39 am                                                    #
+# Modified   : Thursday June 13th 2024 11:37:33 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #
 from dataclasses import dataclass
-from typing import Union
 
-import numpy as np
+import pandas as pd
 from dependency_injector.wiring import Provide, inject
 from scipy import stats
 
@@ -37,8 +36,9 @@ class KSTestResult(StatTestResult):
     """Encapsulates the hypothesis test results."""
 
     name: str = "Kolmogorov-Smirnov Test"
-    a: np.ndarray = None
-    b: Union[np.ndarray, str] = None
+    a_name: str = None
+    b_name: str = None
+    data: pd.DataFrame = None
     n: int = None
     advisory: str = None
 
@@ -50,9 +50,13 @@ class KSTestResult(StatTestResult):
 
     def plot(self) -> None:  # pragma: no cover
         self.visualizer.kstestplot(
-            statistic=self.value, n=len(self.a), result=self.result, alpha=self.alpha
+            statistic=self.value,
+            n=len(self._data[self.a_name]),
+            result=self.result,
+            alpha=self.alpha,
         )
 
+    @property
     def report(self) -> str:
         """Reports the result in APA style."""
         result = f"Kolmogorov-Smirnov Goodness of Fit\nD({self.n})={round(self.value,4)}, p={round(self.pvalue,3)}"
@@ -70,12 +74,9 @@ class KSTest(StatisticalTest):
     two independent samples. Both tests are valid only for continuous distributions.
 
     Args:
-        a (np.ndarray): 1D Numpy array of data to be tested.
-        b (Union[str, np.ndarray]): A 1-D array, or a string containing the name of the
-            reference distribution from the scipy list of Continuous Distributions
-            at https://docs.scipy.org/doc/scipy/reference/stats.html
-        a_name (str): The name of the sample distribution. Optional.
-        b_name (str): The name of the sample 2 distribution, if two-sample test. Optional.
+        a_name (str): Name of a continuous column in the dataset
+        b_name (str): Name of a continuous column in the dataset
+        data (pd.DataFrame): DataFrame containing the two columns.
 
     """
 
@@ -83,13 +84,15 @@ class KSTest(StatisticalTest):
 
     def __init__(
         self,
-        a: np.ndarray,
-        b: Union[str, np.ndarray],
+        a_name: str,
+        b_name: str,
+        data: pd.DataFrame,
         alpha: float = 0.05,
     ) -> None:
         super().__init__()
-        self._a = a
-        self._b = b
+        self._a_name = a_name
+        self._b_name = b_name
+        self._data = data
         self._alpha = alpha
         self._profile = StatTestProfile.create(self.__id)
         self._result = None
@@ -107,22 +110,30 @@ class KSTest(StatisticalTest):
     def run(self) -> None:
         """Performs the statistical test and creates a result object."""
 
-        n = len(self._a)
+        n = len(self._data)
 
         # Conduct the two-sided ks test
         try:
-            result = stats.kstest(rvs=self._a, cdf=self._b, alternative="two-sided")
-        except (
-            AttributeError
-        ) as e:  # pragma: no cover - actually pytest-coverage not picking this up.
-            msg = f"Distribution {self._reference_distribution} is not supported.\n{e}"
+            result = stats.kstest(
+                rvs=self._data[self._a_name].values,
+                cdf=self._data[self._b_name].values,
+                alternative="two-sided",
+            )
+        except KeyError:
+            result = stats.kstest(
+                rvs=self._data[self._a_name].values,
+                cdf=self._b_name,
+                alternative="two-sided",
+            )
+        except Exception as e:  # pragma: no cover
+            msg = f"Invalid arguments {self._a_name}, {self._b_name}\n{e}"
             self._logger.exception(msg)
             raise
 
         advisory = None
-        if len(self._a) < 50:
+        if len(self._data[self._a_name]) < 50:
             advisory = "Note: The Kolmogorov-Smirnov Test requires a sample size N > 50. For smaller sample sizes, the Shapiro-Wilk test should be considered."
-        if len(self._a) > 1000:
+        if len(self._data[self._a_name]) > 1000:
             advisory = "Note: The Kolmogorov-Smirnov Test on large sample sizes may lead to rejections of the null hypothesis that are statistically significant, yet practically insignificant."
 
         # Create the result object.
@@ -132,8 +143,9 @@ class KSTest(StatisticalTest):
             hypothesis=self._profile.hypothesis,
             value=result.statistic,
             pvalue=result.pvalue,
-            a=self._a,
-            b=self._b,
+            a_name=self._a_name,
+            b_name=self._b_name,
+            data=self._data,
             n=n,
             advisory=advisory,
             alpha=self._alpha,

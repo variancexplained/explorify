@@ -11,20 +11,20 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday June 7th 2023 09:15:17 pm                                                 #
-# Modified   : Sunday June 9th 2024 12:18:00 pm                                                    #
+# Modified   : Thursday June 13th 2024 11:23:27 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #
 import inspect
-from datetime import datetime
-import pytest
 import logging
+from datetime import datetime
+
 import pandas as pd
+import pytest
 
-from explorify.eda.stats.inferential.correlation import SpearmanCorrelationTest
 from explorify.eda.stats.inferential.base import StatTestProfile
-
+from explorify.eda.stats.inferential.correlation import SpearmanCorrelationTest
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -50,18 +50,18 @@ class TestSpearman:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = SpearmanCorrelationTest(data=credit, a="Income", b="Age")
+        test = SpearmanCorrelationTest(data=credit, a_name="Income", b_name="Age")
         test.run()
         assert "Spearman" in test.result.name
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.value, float)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.report(), str)
+        assert isinstance(test.result.report, str)
         assert isinstance(test.result.data, pd.DataFrame)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)
-        logging.debug(test.result.report())
+        logging.debug(test.result.report)
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()

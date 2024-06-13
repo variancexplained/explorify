@@ -4,7 +4,7 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.10                                                                             #
-# Filename   : /tests/test_stats/test_inferential/test_cramers_v.py                                #
+# Filename   : /tests/test_stats/test_inferential/test_anova.py                                    #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john.james.ai.studio@gmail.com                                                      #
@@ -23,7 +23,8 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from explorify.eda.stats.inferential.association import CramersVAnalysis
+from explorify.eda.stats.inferential.base import StatTestProfile
+from explorify.eda.stats.inferential.centrality import AnovaOneWayTest
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -33,11 +34,11 @@ single_line = f"\n{100 * '-'}"
 
 
 @pytest.mark.stats
-@pytest.mark.ind
-@pytest.mark.cramersv
-class TestCramersV:  # pragma: no cover
+@pytest.mark.centrality
+@pytest.mark.anova
+class TestAnovaOneWayTest:  # pragma: no cover
     # ============================================================================================ #
-    def test_cramers_v(self, credit, caplog):
+    def test_x2(self, credit, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -49,59 +50,16 @@ class TestCramersV:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = CramersVAnalysis(data=credit, a_name="Gender", b_name="Education")
+        test = AnovaOneWayTest(data=credit, a_name="Education", b_name="Income")
         test.run()
-        result = test.result
-        assert isinstance(result.value, float)
-        assert isinstance(result.pvalue, float)
-        assert result.x2alpha == 0.05
-        assert isinstance(result.data, pd.DataFrame)
-        logging.debug(result)
-        logging.debug(result.report)
-
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            "\nCompleted {} {} in {} seconds at {} on {}".format(
-                self.__class__.__name__,
-                inspect.stack()[0][3],
-                duration,
-                end.strftime("%I:%M:%S %p"),
-                end.strftime("%m/%d/%Y"),
-            )
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_cramers_v_ordinal(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            "\n\nStarted {} {} at {} on {}".format(
-                self.__class__.__name__,
-                inspect.stack()[0][3],
-                start.strftime("%I:%M:%S %p"),
-                start.strftime("%m/%d/%Y"),
-            )
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        test = CramersVAnalysis(
-            data=credit,
-            a_name="Gender",
-            b_name="Education",
-            ordinal_a=True,
-            ordinal_b=True,
-        )
-        test.run()
-        result = test.result
-        assert isinstance(result.value, float)
-        assert isinstance(result.pvalue, float)
-        assert result.x2alpha == 0.05
-        assert isinstance(result.data, pd.DataFrame)
-        logging.debug(result)
-        logging.debug(result.report)
+        assert isinstance(test.result.H0, str)
+        assert isinstance(test.result.value, float)
+        assert isinstance(test.result.pvalue, float)
+        assert test.result.alpha == 0.05
+        assert isinstance(test.result.data, pd.DataFrame)
+        assert isinstance(test.profile, StatTestProfile)
+        logging.debug(test.result)
+        logging.debug(test.result.report)
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()

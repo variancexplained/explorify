@@ -4,14 +4,14 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /explorify/eda/stats/inferential/independence.py                                    #
+# Filename   : /explorify/eda/stats/inferential/rank.py                                            #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Sunday June 9th 2024 11:12:14 am                                                    #
-# Modified   : Thursday June 13th 2024 11:11:50 am                                                 #
+# Created    : Wednesday June 12th 2024 04:00:36 pm                                                #
+# Modified   : Thursday June 13th 2024 11:12:01 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -32,13 +32,12 @@ from explorify.eda.visualize.visualizer import Visualizer
 #                                     TEST RESULT                                                  #
 # ------------------------------------------------------------------------------------------------ #
 @dataclass
-class ChiSquareIndependenceTestResult(StatTestResult):
-    name: str = f"X\u00b2 Test of Independence"  # noqa
+class KruskalWallisHTestResult(StatTestResult):
+    name: str = "Kruskal-Wallis H Test"
     dof: int = None
     data: pd.DataFrame = None
     a_name: str = None
     b_name: str = None
-    visualizer: Visualizer = None
 
     @inject
     def __post_init__(
@@ -47,41 +46,67 @@ class ChiSquareIndependenceTestResult(StatTestResult):
         self.visualizer = visualizer
 
     def plot(self) -> None:  # pragma: no cover
-        self.visualizer.x2testplot(
-            statistic=self.value,
-            dof=self.dof,
-            result=self.result,
-            alpha=self.alpha,
+        title = r"Kruskal-Wallis H Test of median {b_name} in {a_name}".format(
+            b_name=self.b_name,
+            a_name=self.a_name,
+        )
+        self.visualizer.boxplot(
+            x=self.a_name, y=self.b_name, data=self.data, title=title
         )
 
     @property
     def report(self) -> str:
-        return f"X\u00b2 Test of Independence\n{self.a_name.capitalize()} and {self.b_name.capitalize()}\nX\u00b2({self.dof}, N={self.data.shape[0]})={round(self.value,2)}, {self._report_pvalue(self.pvalue)}."
+        if self.pvalue > self.alpha:  # pragma: no cover
+            return r"The {name} Test found a non-significant difference in median {a_name} and {b_name}, H({dof})={statistic}, p>0.05.".format(
+                name=self.name,
+                a_name=self.a_name,
+                b_name=self.b_name,
+                dof=self.dof,
+                statistic=round(self.value, 2),
+            )
+        else:  # pragma: no cover
+            return r"The {name} Test found a significant difference in median {a_name} and {b_name}, H({dof})={statistic}, p>0.05.".format(
+                name=self.name,
+                a_name=self.a_name,
+                b_name=self.b_name,
+                dof=self.dof,
+                statistic=round(self.value, 2),
+            )
 
 
 # ------------------------------------------------------------------------------------------------ #
 #                                          TEST                                                    #
 # ------------------------------------------------------------------------------------------------ #
-class ChiSquareIndependenceTest(StatisticalTest):
-    """Chi-Square Test of Independence
+class KruskalWallisHTest(StatisticalTest):
+    """Calculate the Kruskal-Wallis H Test for the medians of ranked samples of scores.
 
-    The Chi-Square test of independence is used to determine if there is a significant relationship between two nominal (categorical) variables.  The frequency of each category for one nominal variable is compared across the categories of the second nominal variable.
+    The Kruskal-Wallis H-test tests the null hypothesis that the population median of
+    all of the groups are equal. It is a non-parametric version of ANOVA. The test
+    works on 2 or more independent samples, which may have different sizes. Note that
+    rejecting the null hypothesis does not indicate which of the groups differs.
+    Post hoc comparisons between groups are required to determine which groups are different.
+
+    Args:
+        a_name: (str): The column in the dataframe containing the ordinal or nominal variable.
+        b_name: (str): The column in the dataframe containing the numeric variable.
+        alpha (float): The level of statistical significance for inference.
+        data (pd.DataFrame): The DataFrame containing the variables of interest.
+
     """
 
-    __id = "x2ind"
+    __id = "kw"
 
-    @inject
     def __init__(
         self,
+        a_name: str,
+        b_name: str,
         data: pd.DataFrame,
-        a_name: str = None,
-        b_name: str = None,
         alpha: float = 0.05,
     ) -> None:
         super().__init__()
-        self._data = data
         self._a_name = a_name
         self._b_name = b_name
+        self._data = data
         self._alpha = alpha
         self._profile = StatTestProfile.create(self.__id)
         self._result = None
@@ -97,24 +122,26 @@ class ChiSquareIndependenceTest(StatisticalTest):
         return self._result
 
     def run(self) -> None:
-        """Performs the statistical test and creates a result object."""
+        """Executes the Test."""
 
-        obs = stats.contingency.crosstab(
-            self._data[self._a_name], self._data[self._b_name]
-        )
+        groups = [
+            group[self._a_name].values for _, group in self._data.groupby(self._b_name)
+        ]
 
-        statistic, pvalue, dof, exp = stats.chi2_contingency(obs[1])
+        statistic, pvalue = stats.kruskal(*groups)
+
+        dof = len(groups) - 1
 
         # Create the result object.
-        self._result = ChiSquareIndependenceTestResult(
+        self._result = KruskalWallisHTestResult(
             H0=self._profile.H0,
-            statistic="X\u00b2",
+            statistic=self._profile.statistic,
             hypothesis=self._profile.hypothesis,
-            dof=dof,
-            value=statistic,
-            pvalue=pvalue,
-            data=self._data,
             a_name=self._a_name,
             b_name=self._b_name,
+            data=self._data,
+            dof=dof,
+            value=statistic,
             alpha=self._alpha,
+            pvalue=pvalue,
         )

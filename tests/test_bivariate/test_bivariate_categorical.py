@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Sunday June 9th 2024 11:54:12 am                                                    #
-# Modified   : Sunday June 9th 2024 02:48:01 pm                                                    #
+# Modified   : Thursday June 13th 2024 01:29:13 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -45,20 +45,20 @@ single_line = f"\n{100 * '-'}"
 @pytest.mark.category
 class TestCategoricalBivariateAnalysis:  # pragma: no cover
     # ============================================================================================ #
-    def test_validate_input(self, dataset, caplog):
+    def test_validate_input(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=dataset)
+        analysis = CategoricalBivariateAnalysis(data=reviews)
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="review_length", var2="category")
+            analysis.validate_input(a_name="review_length", b_name="category")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="category", var2="review_length")
+            analysis.validate_input(a_name="category", b_name="review_length")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="bogus", var2="category")
+            analysis.validate_input(a_name="bogus", b_name="category")
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -69,15 +69,15 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_contigency_table(self, dataset, caplog):
+    def test_contigency_table(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=dataset)
-        df = analysis.contingency_table(var1="app_name", var2="category")
+        analysis = CategoricalBivariateAnalysis(data=reviews)
+        df = analysis.contingency_table(a_name="app_name", b_name="category")
         assert isinstance(df, pd.DataFrame)
         logger.info(df.head())
         # ---------------------------------------------------------------------------------------- #
@@ -90,15 +90,15 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_chisquare(self, dataset, caplog):
+    def test_chisquare(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=dataset)
-        result = analysis.chi_square(var1="app_name", var2="category")
+        analysis = CategoricalBivariateAnalysis(data=reviews)
+        result = analysis.chi_square(a_name="app_name", b_name="category")
         assert isinstance(result, StatTestResult)
         logger.info(result.report)
         logger.info(result)
@@ -112,15 +112,15 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_cramersv(self, dataset, caplog):
+    def test_cramersv(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=dataset)
-        result = analysis.cramers_v(var1="app_name", var2="category")
+        analysis = CategoricalBivariateAnalysis(data=reviews)
+        result = analysis.cramers_v(a_name="app_name", b_name="category")
         assert isinstance(result, StatTestResult)
         logger.info(result.report)
         logger.info(result)
@@ -134,15 +134,15 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_mutual_info(self, dataset, caplog):
+    def test_mutual_info(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=dataset)
-        result = analysis.mutual_information(var1="app_name", var2="category")
+        analysis = CategoricalBivariateAnalysis(data=reviews)
+        result = analysis.mutual_information(a_name="app_name", b_name="category")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -170,11 +170,11 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalNominalBivariateAnalysis(data=credit)
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="Income", var2="Gender")
+            analysis.validate_input(a_name="Income", b_name="Gender")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="Gender", var2="Income")
+            analysis.validate_input(a_name="Gender", b_name="Income")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="bogus", var2="Gender")
+            analysis.validate_input(a_name="bogus", b_name="Gender")
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -193,7 +193,7 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalNominalBivariateAnalysis(data=credit)
-        result = analysis.phi_coefficient(var1="Marital Status", var2="Gender")
+        result = analysis.phi_coefficient(a_name="Marital Status", b_name="Gender")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -215,7 +215,7 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalNominalBivariateAnalysis(data=credit)
         with pytest.raises(ValueError):
-            _ = analysis.phi_coefficient(var1="Education", var2="Gender")
+            _ = analysis.phi_coefficient(a_name="Education", b_name="Gender")
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
@@ -235,7 +235,9 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalNominalBivariateAnalysis(data=credit)
-        result = analysis.contingency_coefficient(var1="Marital Status", var2="Gender")
+        result = analysis.contingency_coefficient(
+            a_name="Marital Status", b_name="Gender"
+        )
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -256,7 +258,7 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalNominalBivariateAnalysis(data=credit)
-        result = analysis.lambda_coefficient(var1="Marital Status", var2="Gender")
+        result = analysis.lambda_coefficient(a_name="Marital Status", b_name="Gender")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -283,11 +285,11 @@ class TestNominalOrdinalBivariateAnalysis:  # pragma: no cover
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalOrdinalBivariateAnalysis(data=credit)
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="Income", var2="Gender")
+            analysis.validate_input(a_name="Income", b_name="Gender")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="Gender", var2="Income")
+            analysis.validate_input(a_name="Gender", b_name="Income")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="bogus", var2="Gender")
+            analysis.validate_input(a_name="bogus", b_name="Gender")
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -306,7 +308,7 @@ class TestNominalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.gamma(var1="Gender", var2="Education")
+        result = analysis.gamma(a_name="Gender", b_name="Education")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -327,7 +329,7 @@ class TestNominalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.lambda_coefficient(var1="Gender", var2="Education")
+        result = analysis.lambda_coefficient(a_name="Gender", b_name="Education")
         assert isinstance(result, float)
         logger.info(result)
 
@@ -349,7 +351,7 @@ class TestNominalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.theil_u(var1="Gender", var2="Education")
+        result = analysis.theil_u(a_name="Gender", b_name="Education")
         assert isinstance(result, float)
         logger.info(result)
 
@@ -377,11 +379,11 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="Income", var2="Gender")
+            analysis.validate_input(a_name="Income", b_name="Gender")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="Gender", var2="Income")
+            analysis.validate_input(a_name="Gender", b_name="Income")
         with pytest.raises(ValueError):
-            analysis.validate_input(var1="bogus", var2="Gender")
+            analysis.validate_input(a_name="bogus", b_name="Gender")
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -400,7 +402,7 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.cramer_v(var1="Gender", var2="Education")
+        result = analysis.cramer_v(a_name="Gender", b_name="Education")
         assert isinstance(result, StatTestResult)
         logger.info(result)
 
@@ -413,7 +415,7 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.gamma(var1="Gender", var2="Education")
+        result = analysis.gamma(a_name="Gender", b_name="Education")
         assert isinstance(result, float)
         logger.info(result)
 
@@ -426,7 +428,7 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.kendalls_tau(var1="Gender", var2="Education")
+        result = analysis.kendalls_tau(a_name="Gender", b_name="Education")
         assert isinstance(result, StatTestResult)
         logger.info(result)
 
@@ -439,7 +441,7 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.spearmans_rank(var1="Gender", var2="Education")
+        result = analysis.spearmans_rank(a_name="Gender", b_name="Education")
         assert isinstance(result, StatTestResult)
         logger.info(result)
 
@@ -452,7 +454,7 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.mutual_information(var1="Gender", var2="Education")
+        result = analysis.mutual_information(a_name="Gender", b_name="Education")
         assert isinstance(result, float)
         logger.info(result)
 
@@ -465,6 +467,6 @@ class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
         analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.contingency_table(var1="Gender", var2="Education")
+        result = analysis.contingency_table(a_name="Gender", b_name="Education")
         assert isinstance(result, pd.DataFrame)
         logger.info(result)

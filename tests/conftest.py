@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday April 25th 2024 12:55:55 am                                                #
-# Modified   : Sunday June 9th 2024 04:18:09 pm                                                    #
+# Modified   : Wednesday June 12th 2024 10:21:53 pm                                                #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -44,7 +44,7 @@ CASES_FP = "tests/data/calc_cases.csv"
 #                                   DATASET FIXTURE                                                #
 # ------------------------------------------------------------------------------------------------ #
 @pytest.fixture(scope="module", autouse=False)
-def dataset():
+def reviews():
     """Returns test data."""
     FP = "tests/data/dataset.pkl"
     df = IOService.read(filepath=FP)

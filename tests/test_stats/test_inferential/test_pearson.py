@@ -11,22 +11,21 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday June 7th 2023 09:15:17 pm                                                 #
-# Modified   : Sunday June 9th 2024 12:18:01 pm                                                    #
+# Modified   : Thursday June 13th 2024 11:23:27 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #
 import inspect
-from datetime import datetime
-import pytest
 import logging
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
+import pytest
 
-from explorify.eda.stats.inferential.correlation import PearsonCorrelationTest
 from explorify.eda.stats.inferential.base import StatTestProfile
-
+from explorify.eda.stats.inferential.correlation import PearsonCorrelationTest
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -52,14 +51,14 @@ class TestPearson:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = PearsonCorrelationTest(data=credit, a="Income", b="Age")
+        test = PearsonCorrelationTest(data=credit, a_name="Income", b_name="Age")
         test.run()
         assert "Pearson" in test.result.name
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.value, float)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.report(), str)
+        assert isinstance(test.result.report, str)
         assert isinstance(test.result.data, pd.DataFrame)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)
@@ -96,14 +95,14 @@ class TestPearson:  # pragma: no cover
         b = np.linspace(100, 10, 100)
         d = {"sample a": a, "sample b": b}
         df = pd.DataFrame(d)
-        test = PearsonCorrelationTest(data=df, a="sample a", b="sample b")
+        test = PearsonCorrelationTest(data=df, a_name="sample a", b_name="sample b")
         test.run()
         assert "Pearson" in test.result.name
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.value, float)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.report(), str)
+        assert isinstance(test.result.report, str)
         assert isinstance(test.result.data, pd.DataFrame)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)

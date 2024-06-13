@@ -11,21 +11,21 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 8th 2023 03:48:00 am                                                  #
-# Modified   : Sunday June 9th 2024 12:18:01 pm                                                    #
+# Modified   : Thursday June 13th 2024 11:23:28 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #
 import inspect
-from datetime import datetime
-import pytest
 import logging
-import pandas as pd
+from datetime import datetime
+
 import numpy as np
+import pandas as pd
+import pytest
 
-from explorify.eda.stats.inferential.gof import KSTest
 from explorify.eda.stats.inferential.base import StatTestProfile
-
+from explorify.eda.stats.inferential.gof import KSTest
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -39,7 +39,7 @@ single_line = f"\n{100 * '-'}"
 @pytest.mark.kstest
 class TestKSTest:  # pragma: no cover
     # ============================================================================================ #
-    def test_kstest(self, credit, caplog):
+    def test_kstest(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -51,19 +51,17 @@ class TestKSTest:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        male = credit[credit["Gender"] == "Male"]["Income"]
-        female = credit[credit["Gender"] == "Female"]["Income"]
-        test = KSTest(a=male, b=female)
+        test = KSTest(a_name="rating", b_name="review_length", data=reviews)
         test.run()
         assert "Kolmogorov" in test.result.name
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.a, pd.Series)
-        assert isinstance(test.result.b, pd.Series)
+        assert isinstance(test.result.a_name, str)
+        assert isinstance(test.result.b_name, str)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)
-        logging.debug(test.result.report())
+        logging.debug(test.result.report)
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
@@ -81,7 +79,7 @@ class TestKSTest:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_kstest_norm(self, credit, caplog):
+    def test_kstest_norm(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -93,14 +91,14 @@ class TestKSTest:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        female = credit[credit["Gender"] == "Female"]["Income"].values
-        test = KSTest(a=female, b="norm")
+
+        test = KSTest(a_name="rating", b_name="norm", data=reviews)
         test.run()
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.a, np.ndarray)
-        assert isinstance(test.result.b, str)
+        assert isinstance(test.result.a_name, str)
+        assert isinstance(test.result.b_name, str)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)
 
@@ -120,7 +118,7 @@ class TestKSTest:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_kstest_small_credit(self, credit, caplog):
+    def test_kstest_small_rating(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -132,14 +130,13 @@ class TestKSTest:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        female = credit[credit["Gender"] == "Female"]["Income"].values[0:30]
-        test = KSTest(a=female, b="norm")
+        test = KSTest(a_name="rating", b_name="norm", data=reviews[:30])
         test.run()
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.a, np.ndarray)
-        assert isinstance(test.result.b, str)
+        assert isinstance(test.result.a_name, str)
+        assert isinstance(test.result.b_name, str)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)
 
@@ -159,7 +156,7 @@ class TestKSTest:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_kstest_large_credit(self, credit, caplog):
+    def test_kstest_large_rating(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -171,17 +168,22 @@ class TestKSTest:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        female = credit[credit["Gender"] == "Female"]["Income"].values
-        mu = np.mean(female)
-        sigma = np.std(female)
-        data = np.random.normal(loc=mu, scale=sigma, size=1200)
-        test = KSTest(a=data, b=female)
+        ratings = reviews["rating"].values
+        mu = np.mean(ratings)
+        sigma = np.std(ratings)
+        data = pd.DataFrame(
+            {
+                "random": np.random.normal(loc=mu, scale=sigma, size=1200),
+                "rating": np.random.normal(loc=mu, scale=sigma, size=1200),
+            }
+        )
+        test = KSTest(a_name="rating", b_name="random", data=data)
         test.run()
         assert isinstance(test.result.H0, str)
         assert isinstance(test.result.pvalue, float)
         assert test.result.alpha == 0.05
-        assert isinstance(test.result.a, np.ndarray)
-        assert isinstance(test.result.b, np.ndarray)
+        assert isinstance(test.result.a_name, str)
+        assert isinstance(test.result.b_name, str)
         assert isinstance(test.profile, StatTestProfile)
         logging.debug(test.result)
 
@@ -201,7 +203,7 @@ class TestKSTest:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_kstest_invalid_distribution(self, credit, caplog):
+    def test_kstest_invalid_distribution(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -213,8 +215,7 @@ class TestKSTest:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        female = credit[credit["Gender"] == "Female"]["Income"].values
-        test = KSTest(a=female, b="fake")
+        test = KSTest(a_name="rating", b_name="fake", data=reviews)
         with pytest.raises(AttributeError):
             test.run()
 
@@ -234,7 +235,7 @@ class TestKSTest:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_kstest_fail_to_reject(self, credit, caplog):
+    def test_kstest_invalid_args(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             "\n\nStarted {} {} at {} on {}".format(
@@ -246,17 +247,9 @@ class TestKSTest:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        data = np.random.normal(size=500)
-        test = KSTest(a=data, b="norm")
-        test.run()
-        assert isinstance(test.result.H0, str)
-        assert isinstance(test.result.pvalue, float)
-        assert test.result.pvalue > test.result.alpha / 2
-        assert test.result.alpha == 0.05
-        assert isinstance(test.result.a, np.ndarray)
-        assert isinstance(test.result.b, str)
-        assert isinstance(test.profile, StatTestProfile)
-        logging.debug(test.result)
+        test = KSTest(a_name="bogus1", b_name="bogus2", data=reviews)
+        with pytest.raises(KeyError):
+            test.run()
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()

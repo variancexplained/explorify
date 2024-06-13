@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday June 8th 2024 04:48:13 pm                                                  #
-# Modified   : Sunday June 9th 2024 12:40:57 pm                                                    #
+# Modified   : Wednesday June 12th 2024 10:22:31 pm                                                #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -39,14 +39,14 @@ single_line = f"\n{100 * '-'}"
 @pytest.mark.numeric
 class TestUnivariateNumeric:  # pragma: no cover
     # ============================================================================================ #
-    def test_validation(self, dataset, caplog):
+    def test_validation(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        numeric = Numeric(data=dataset)
+        numeric = Numeric(data=reviews)
 
         with pytest.raises(ValueError):
             _ = numeric.descriptive_statistics(x="bogus")
@@ -63,14 +63,14 @@ class TestUnivariateNumeric:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_descriptive_statistics(self, dataset, caplog):
+    def test_descriptive_statistics(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        numeric = Numeric(data=dataset)
+        numeric = Numeric(data=reviews)
         result = numeric.descriptive_statistics(x="review_length")
         assert isinstance(result, pd.DataFrame)
         logging.info(result)
@@ -85,14 +85,14 @@ class TestUnivariateNumeric:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_iqr(self, dataset, caplog):
+    def test_iqr(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        numeric = Numeric(data=dataset)
+        numeric = Numeric(data=reviews)
         result = numeric.iqr(x="review_length")
         assert isinstance(result, float)
         logging.info(result)
@@ -106,14 +106,14 @@ class TestUnivariateNumeric:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_mad(self, dataset, caplog):
+    def test_mad(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        numeric = Numeric(data=dataset)
+        numeric = Numeric(data=reviews)
         result = numeric.mad(x="review_length")
         assert isinstance(result, float)
         logging.info(result)
@@ -127,14 +127,14 @@ class TestUnivariateNumeric:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_std_error(self, dataset, caplog):
+    def test_std_error(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        numeric = Numeric(data=dataset)
+        numeric = Numeric(data=reviews)
         result = numeric.standard_error(x="review_length")
         assert isinstance(result, float)
         logging.info(result)
@@ -148,14 +148,14 @@ class TestUnivariateNumeric:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_coefficient_of_variation(self, dataset, caplog):
+    def test_coefficient_of_variation(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        numeric = Numeric(data=dataset)
+        numeric = Numeric(data=reviews)
         result = numeric.coefficient_of_variation(x="review_length")
         assert isinstance(result, float)
         logging.info(result)

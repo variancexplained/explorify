@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Sunday June 9th 2024 10:52:53 am                                                    #
-# Modified   : Sunday June 9th 2024 03:20:14 pm                                                    #
+# Modified   : Thursday June 13th 2024 11:29:53 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -26,7 +26,8 @@ from sklearn.metrics import mutual_info_score
 
 from explorify.eda.stats.inferential.association import (
     CramersVAnalysis,
-    KendallsTauAnalysis,
+    KendallsTauTest,
+    KendallsTauTestResult,
 )
 from explorify.eda.stats.inferential.base import StatTestResult
 from explorify.eda.stats.inferential.correlation import SpearmanCorrelationTest
@@ -58,18 +59,18 @@ class CategoricalBivariateAnalysis(ABC):
         """
         Initializes the CategoricalBivariateAnalysis instance."""
         self._data = data
-        self.cramers_analysis_cls = cramers_analysis_cls
-        self.chisquare_test_cls = chisquare_test_cls
+        self._cramers_analysis_cls = cramers_analysis_cls
+        self._chisquare_test_cls = chisquare_test_cls
 
-    def validate_input(self, var1: str, var2: str) -> None:
+    def validate_input(self, a_name: str, b_name: str) -> None:
         """
         Validates the input variables.
 
         Parameters
         ----------
-        var1 : str
+        a_name : str
             The name of the first categorical variable.
-        var2 : str
+        b_name : str
             The name of the second categorical variable.
 
         Raises
@@ -77,26 +78,26 @@ class CategoricalBivariateAnalysis(ABC):
         ValueError
             If the input variables are not in the DataFrame or are numeric.
         """
-        if var1 not in self._data.columns or var2 not in self._data.columns:
+        if a_name not in self._data.columns or b_name not in self._data.columns:
             raise ValueError(
-                f"Variables '{var1}' and/or '{var2}' are not in the DataFrame."
+                f"Variables '{a_name}' and/or '{b_name}' are not in the DataFrame."
             )
 
-        if pd.api.types.is_numeric_dtype(self._data[var1]):
-            raise ValueError(f"Variable '{var1}' is numeric and not categorical.")
+        if pd.api.types.is_numeric_dtype(self._data[a_name]):
+            raise ValueError(f"Variable '{a_name}' is numeric and not categorical.")
 
-        if pd.api.types.is_numeric_dtype(self._data[var2]):
-            raise ValueError(f"Variable '{var2}' is numeric and not categorical.")
+        if pd.api.types.is_numeric_dtype(self._data[b_name]):
+            raise ValueError(f"Variable '{b_name}' is numeric and not categorical.")
 
-    def contingency_table(self, var1: str, var2: str) -> pd.DataFrame:
+    def contingency_table(self, a_name: str, b_name: str) -> pd.DataFrame:
         """
         Computes the contingency table for two categorical variables.
 
         Parameters
         ----------
-        var1 : str
+        a_name : str
             The name of the first categorical variable.
-        var2 : str
+        b_name : str
             The name of the second categorical variable.
 
         Returns
@@ -104,18 +105,18 @@ class CategoricalBivariateAnalysis(ABC):
         pd.DataFrame
             Contingency table of the two variables.
         """
-        self.validate_input(var1, var2)
-        return pd.crosstab(self._data[var1], self._data[var2])
+        self.validate_input(a_name, b_name)
+        return pd.crosstab(self._data[a_name], self._data[b_name])
 
-    def chi_square(self, var1: str, var2: str) -> StatTestResult:
+    def chi_square(self, a_name: str, b_name: str) -> StatTestResult:
         """
         Computes the chi-square statistic for two categorical variables.
 
         Parameters
         ----------
-        var1 : str
+        a_name : str
             The name of the first categorical variable.
-        var2 : str
+        b_name : str
             The name of the second categorical variable.
 
         Returns
@@ -123,20 +124,22 @@ class CategoricalBivariateAnalysis(ABC):
         tuple[float, float]
             Chi-square statistic and p-value of the test.
         """
-        self.validate_input(var1, var2)
-        analysis = self.chisquare_test_cls(data=self._data, a=var1, b=var2)
+        self.validate_input(a_name, b_name)
+        analysis = self._chisquare_test_cls(
+            data=self._data, a_name=a_name, b_name=b_name
+        )
         analysis.run()
         return analysis.result
 
-    def cramers_v(self, var1: str, var2: str) -> StatTestResult:
+    def cramers_v(self, a_name: str, b_name: str) -> StatTestResult:
         """
         Computes Cramér's V statistic for two categorical variables.
 
         Parameters
         ----------
-        var1 : str
+        a_name : str
             The name of the first categorical variable.
-        var2 : str
+        b_name : str
             The name of the second categorical variable.
 
         Returns
@@ -144,20 +147,20 @@ class CategoricalBivariateAnalysis(ABC):
         float
             Cramér's V statistic.
         """
-        self.validate_input(var1, var2)
-        analysis = self.cramers_analysis_cls(self._data, a=var1, b=var2)
+        self.validate_input(a_name, b_name)
+        analysis = self._cramers_analysis_cls(self._data, a_name=a_name, b_name=b_name)
         analysis.run()
         return analysis.result
 
-    def mutual_information(self, var1: str, var2: str) -> float:
+    def mutual_information(self, a_name: str, b_name: str) -> float:
         """
         Computes the mutual information between two categorical variables.
 
         Parameters
         ----------
-        var1 : str
+        a_name : str
             The name of the first categorical variable.
-        var2 : str
+        b_name : str
             The name of the second categorical variable.
 
         Returns
@@ -165,8 +168,8 @@ class CategoricalBivariateAnalysis(ABC):
         float
             Mutual information score.
         """
-        self.validate_input(var1, var2)
-        return mutual_info_score(self._data[var1], self._data[var2])
+        self.validate_input(a_name, b_name)
+        return mutual_info_score(self._data[a_name], self._data[b_name])
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -185,11 +188,11 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
         _data (pd.DataFrame): The input data containing the variables.
 
     Methods:
-        phi_coefficient(var1: str, var2: str) -> float:
+        phi_coefficient(a_name: str, b_name: str) -> float:
             Computes the Phi coefficient for two nominal variables (for 2x2 tables).
-        contingency_coefficient(var1: str, var2: str) -> float:
+        contingency_coefficient(a_name: str, b_name: str) -> float:
             Computes the contingency coefficient for two nominal variables.
-        lambda_coefficient(var1: str, var2: str) -> float:
+        lambda_coefficient(a_name: str, b_name: str) -> float:
             Computes the lambda coefficient for two nominal variables.
     """
 
@@ -202,19 +205,19 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
         """
         super().__init__(data=data)
 
-    def phi_coefficient(self, var1: str, var2: str) -> float:
+    def phi_coefficient(self, a_name: str, b_name: str) -> float:
         """
         Computes the Phi coefficient for two nominal variables (for 2x2 tables).
 
         Args:
-            var1 (str): The name of the first nominal variable.
-            var2 (str): The name of the second nominal variable.
+            a_name (str): The name of the first nominal variable.
+            b_name (str): The name of the second nominal variable.
 
         Returns:
             float: Phi coefficient.
         """
-        self.validate_input(var1, var2)
-        contingency_table = self.contingency_table(var1, var2)
+        self.validate_input(a_name, b_name)
+        contingency_table = self.contingency_table(a_name, b_name)
         if contingency_table.shape != (2, 2):
             raise ValueError(
                 "Phi coefficient can only be computed for 2x2 contingency tables."
@@ -224,36 +227,36 @@ class NominalNominalBivariateAnalysis(CategoricalBivariateAnalysis):
         n = self._data.shape[0]
         return np.sqrt(chi2 / n)
 
-    def contingency_coefficient(self, var1: str, var2: str) -> float:
+    def contingency_coefficient(self, a_name: str, b_name: str) -> float:
         """
         Computes the contingency coefficient for two nominal variables.
 
         Args:
-            var1 (str): The name of the first nominal variable.
-            var2 (str): The name of the second nominal variable.
+            a_name (str): The name of the first nominal variable.
+            b_name (str): The name of the second nominal variable.
 
         Returns:
             float: Contingency coefficient.
         """
-        self.validate_input(var1, var2)
-        contingency_table = self.contingency_table(var1, var2)
+        self.validate_input(a_name, b_name)
+        contingency_table = self.contingency_table(a_name, b_name)
         chi2, _, _, _ = stats.chi2_contingency(contingency_table)
         n = self._data.shape[0]
         return np.sqrt(chi2 / (chi2 + n))
 
-    def lambda_coefficient(self, var1: str, var2: str) -> float:
+    def lambda_coefficient(self, a_name: str, b_name: str) -> float:
         """
         Computes the lambda coefficient for two nominal variables.
 
         Args:
-            var1 (str): The name of the first nominal variable.
-            var2 (str): The name of the second nominal variable.
+            a_name (str): The name of the first nominal variable.
+            b_name (str): The name of the second nominal variable.
 
         Returns:
             float: Lambda coefficient.
         """
-        self.validate_input(var1, var2)
-        contingency_table = self.contingency_table(var1, var2)
+        self.validate_input(a_name, b_name)
+        contingency_table = self.contingency_table(a_name, b_name)
         chi2, _, _, _ = stats.chi2_contingency(contingency_table)
         n = self._data.shape[0]
         return np.sqrt(chi2 / (n * min(contingency_table.shape)))
@@ -275,11 +278,11 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         _data (pd.DataFrame): The input data containing the variables.
 
     Methods:
-        gamma(var1: str, var2: str) -> float:
+        gamma(a_name: str, b_name: str) -> float:
             Computes the Gamma coefficient for a nominal and an ordinal variable.
-        lambda_coefficient(var1: str, var2: str) -> float:
+        lambda_coefficient(a_name: str, b_name: str) -> float:
             Computes the lambda coefficient for a nominal and an ordinal variable.
-        theil_u(var1: str, var2: str) -> float:
+        theil_u(a_name: str, b_name: str) -> float:
             Computes Theil's U coefficient for a nominal and an ordinal variable.
     """
 
@@ -292,52 +295,54 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         """
         super().__init__(data=data)
 
-    def contingency_table(self, var1: str, var2: str) -> pd.DataFrame:
+    def contingency_table(self, a_name: str, b_name: str) -> pd.DataFrame:
         """
         Computes the contingency table for a nominal variable and an ordinal variable.
 
         Args:
-            var1 (str): The name of the nominal variable.
-            var2 (str): The name of the ordinal variable.
+            a_name (str): The name of the nominal variable.
+            b_name (str): The name of the ordinal variable.
 
         Returns:
             pd.DataFrame: Contingency table of the two variables.
         """
         # Sort the ordinal variable values
-        sorted_ordinal_values = self._data[var2].sort_values()
+        sorted_ordinal_values = self._data[b_name].sort_values()
 
         # Create a contingency table using the nominal variable and sorted ordinal values
-        return pd.crosstab(self._data[var1], sorted_ordinal_values)
+        return pd.crosstab(self._data[a_name], sorted_ordinal_values)
 
-    def gamma(self, var1: str, var2: str) -> float:
+    def gamma(self, a_name: str, b_name: str) -> float:
         """
         Computes the Gamma coefficient for a nominal and an ordinal variable.
 
         Args:
-            var1 (str): The name of the nominal variable.
-            var2 (str): The name of the ordinal variable. Note, ordinal
+            a_name (str): The name of the nominal variable.
+            b_name (str): The name of the ordinal variable. Note, ordinal
                 variables must be in lexicographical order. For instance
                 "0_low_income", "1_moderate_income", etc...
 
         Returns:
             float: Gamma coefficient.
         """
-        self.validate_input(var1, var2)
-        contingency_table = self.contingency_table(var1, var2)
+        self.validate_input(a_name, b_name)
+        contingency_table = self.contingency_table(a_name, b_name)
 
         # Compute the ranks for the ordinal variable
-        ranks = self._data[var2].rank(method="dense")
+        ranks = self._data[b_name].rank(method="dense")
 
         # Calculate the differences in ranks for concordant and discordant pairs
         concordant_pairs = 0
         discordant_pairs = 0
         for i in range(len(self._data)):
             for j in range(i + 1, len(self._data)):
-                if self._data[var1][i] != self._data[var1][j]:
+                if self._data[a_name][i] != self._data[a_name][j]:
                     if (ranks[i] - ranks[j]) * (
-                        contingency_table.loc[self._data[var1][i], self._data[var2][j]]
+                        contingency_table.loc[
+                            self._data[a_name][i], self._data[b_name][j]
+                        ]
                         - contingency_table.loc[
-                            self._data[var1][j], self._data[var2][i]
+                            self._data[a_name][j], self._data[b_name][i]
                         ]
                     ) > 0:
                         concordant_pairs += 1
@@ -348,21 +353,21 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
             concordant_pairs + discordant_pairs
         )
 
-    def lambda_coefficient(self, var1: str, var2: str) -> float:
+    def lambda_coefficient(self, a_name: str, b_name: str) -> float:
         """
         Computes the lambda coefficient for a nominal and an ordinal variable.
 
         Args:
-            var1 (str): The name of the nominal variable.
-            var2 (str): The name of the ordinal variable. Note, ordinal
+            a_name (str): The name of the nominal variable.
+            b_name (str): The name of the ordinal variable. Note, ordinal
                 variables must be in lexicographical order. For instance
                 "0_low_income", "1_moderate_income", etc...
 
         Returns:
             float: Lambda coefficient.
         """
-        self.validate_input(var1, var2)
-        contingency_table = self.contingency_table(var1, var2)
+        self.validate_input(a_name, b_name)
+        contingency_table = self.contingency_table(a_name, b_name)
         n = contingency_table.sum().sum()  # Total number of observations
 
         # Calculate the marginal proportions
@@ -385,23 +390,23 @@ class NominalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
 
         return (observed_agreement - expected_agreement) / (1 - expected_agreement)
 
-    def theil_u(self, var1: str, var2: str) -> float:
+    def theil_u(self, a_name: str, b_name: str) -> float:
         """
         Computes Theil's U coefficient for a nominal and an ordinal variable.
 
         Args:
-            var1 (str): The name of the nominal variable.
-            var2 (str): The name of the ordinal variable. Note, ordinal
+            a_name (str): The name of the nominal variable.
+            b_name (str): The name of the ordinal variable. Note, ordinal
                 variables must be in lexicographical order. For instance
                 "0_low_income", "1_moderate_income", etc...
 
         Returns:
             float: Theil's U coefficient.
         """
-        self.validate_input(var1, var2)
+        self.validate_input(a_name, b_name)
         # Calculate the marginal probabilities
-        p_x = self._data[var1].value_counts(normalize=True)
-        p_y_given_x = self._data.groupby(var1)[var2].value_counts(normalize=True)
+        p_x = self._data[a_name].value_counts(normalize=True)
+        p_y_given_x = self._data.groupby(a_name)[b_name].value_counts(normalize=True)
 
         # Compute Theil's U coefficient
         u = 0
@@ -429,24 +434,24 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         _data (pd.DataFrame): The input data containing the variables.
 
     Methods:
-        contingency_table(var1: str, var2: str) -> pd.DataFrame:
+        contingency_table(a_name: str, b_name: str) -> pd.DataFrame:
             Computes the contingency table for two ordinal variables.
-        cramer_v(var1: str, var2: str) -> float:
+        cramer_v(a_name: str, b_name: str) -> float:
             Computes Cramér's V statistic for two ordinal variables.
-        gamma(var1: str, var2: str) -> float:
+        gamma(a_name: str, b_name: str) -> float:
             Computes the Gamma coefficient for two ordinal variables.
-        kendalls_tau(var1: str, var2: str) -> float:
+        kendalls_tau(a_name: str, b_name: str) -> float:
             Computes Kendall's Tau coefficient for two ordinal variables.
-        spearmans_rank(var1: str, var2: str) -> float:
+        spearmans_rank(a_name: str, b_name: str) -> float:
             Computes Spearman's Rank Correlation coefficient for two ordinal variables.
-        mutual_information(var1: str, var2: str) -> float:
+        mutual_information(a_name: str, b_name: str) -> float:
             Computes Mutual Information adjusted for ordinal data for two ordinal variables.
     """
 
     def __init__(
         self,
         data: pd.DataFrame,
-        kendalls_tau_cls: Type[KendallsTauAnalysis] = KendallsTauAnalysis,
+        kendalls_tau_cls: Type[KendallsTauTest] = KendallsTauTest,
         spearmans_rank_cls: Type[SpearmanCorrelationTest] = SpearmanCorrelationTest,
     ):
         """
@@ -456,67 +461,75 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
             _data (pd.DataFrame): The input data containing the variables.
         """
         super().__init__(data=data)
-        self.kendalls_tau_cls = kendalls_tau_cls
+        self._kendalls_tau_cls = kendalls_tau_cls
         self.spearmans_rank_cls = spearmans_rank_cls
 
-    def contingency_table(self, var1: str, var2: str) -> pd.DataFrame:
+    def contingency_table(self, a_name: str, b_name: str) -> pd.DataFrame:
         """
         Computes the contingency table for two ordinal variables.
 
         Args:
-            var1 (str): The name of the first ordinal variable.
-            var2 (str): The name of the second ordinal variable.
+            a_name (str): The name of the first ordinal variable.
+            b_name (str): The name of the second ordinal variable.
 
         Returns:
             pd.DataFrame: Contingency table of the two variables.
         """
         # Sort both ordinal variables
-        sorted_var1 = self._data[var1].sort_values()
-        sorted_var2 = self._data[var2].sort_values()
+        sorted_a_name = self._data[a_name].sort_values()
+        sorted_b_name = self._data[b_name].sort_values()
 
         # Create a contingency table using the sorted ordinal variables
-        return pd.crosstab(sorted_var1, sorted_var2)
+        return pd.crosstab(sorted_a_name, sorted_b_name)
 
-    def cramer_v(self, var1: str, var2: str) -> float:
+    def cramer_v(
+        self, a_name: str, b_name: str, ordinal_a: bool = False, ordinal_b: bool = False
+    ) -> float:
         """
         Computes Cramér's V statistic for two ordinal variables.
 
         Args:
-            var1 (str): The name of the first ordinal variable.This assumes that variable values
+            a_name (str): The name of the first ordinal variable.This assumes that variable values
                 have lexicographical order
-            var2 (str): The name of the second ordinal variable.This assumes that variable values
+            b_name (str): The name of the second ordinal variable.This assumes that variable values
                 have lexicographical order
+            ordinal_a (bool): True, if a_name variable is ordinal. False otherwise.
+            ordinal_b (bool): True, if b_name variable is ordinal. False otherwise.
 
         Returns:
             float: Cramér's V statistic.
         """
-        self.validate_input(var1, var2)
-        analysis = self.cramers_analysis_cls(
-            data=self._data, a=var1, b=var2, ordinal_a=True, ordinal_b=True
+        self.validate_input(a_name, b_name)
+        analysis = self._cramers_analysis_cls(
+            data=self._data,
+            a_name=a_name,
+            b_name=b_name,
+            ordinal_a=ordinal_a,
+            ordinal_b=ordinal_b,
         )
         analysis.run()
         return analysis.result
 
-    def gamma(self, var1: str, var2: str) -> float:
+    def gamma(self, a_name: str, b_name: str) -> float:
         """
         Computes the Gamma coefficient for two ordinal variables.
 
         Args:
-            var1 (str): The name of the first ordinal variable.
-            var2 (str): The name of the second ordinal variable. Both ordinal variables must be sorted.
+            a_name (str): The name of the first ordinal variable.
+            b_name (str): The name of the second ordinal variable. Both ordinal variables must be sorted.
 
         Returns:
             float: Gamma coefficient.
         """
-        self.validate_input(var1, var2)
+        self.validate_input(a_name, b_name)
 
         # Sort both ordinal variables
-        sorted_var1 = self._data[var1].sort_values()
-        sorted_var2 = self._data[var2].sort_values()
+        sorted_a_name = self._data[a_name].sort_values()
+        sorted_b_name = self._data[b_name].sort_values()
 
         # Compute ranks for both ordinal variables
-        ranks_var1 = sorted_var1.rank(method="dense")
-        ranks_var2 = sorted_var2.rank(method="dense")
+        ranks_a_name = sorted_a_name.rank(method="dense")
+        ranks_b_name = sorted_b_name.rank(method="dense")
 
         # Calculate the differences in ranks for concordant and discordant pairs
         concordant_pairs = 0
@@ -524,11 +537,11 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
         for i in range(len(self._data)):
             for j in range(i + 1, len(self._data)):
                 if (
-                    sorted_var1.iloc[i] != sorted_var1.iloc[j]
-                    and sorted_var2.iloc[i] != sorted_var2.iloc[j]
+                    sorted_a_name.iloc[i] != sorted_a_name.iloc[j]
+                    and sorted_b_name.iloc[i] != sorted_b_name.iloc[j]
                 ):  # pragma: no cover
-                    if (ranks_var1.iloc[i] - ranks_var1.iloc[j]) * (
-                        ranks_var2.iloc[i] - ranks_var2.iloc[j]
+                    if (ranks_a_name.iloc[i] - ranks_a_name.iloc[j]) * (
+                        ranks_b_name.iloc[i] - ranks_b_name.iloc[j]
                     ) > 0:  # pragma: no cover
                         concordant_pairs += 1
                     else:
@@ -538,62 +551,70 @@ class OrdinalOrdinalBivariateAnalysis(CategoricalBivariateAnalysis):
             concordant_pairs + discordant_pairs
         )
 
-    def kendalls_tau(self, var1: str, var2: str) -> float:
+    def kendalls_tau(
+        self, a_name: str, b_name: str, ordinal_a: bool = False, ordinal_b: bool = False
+    ) -> KendallsTauTestResult:
         """
         Computes Kendall's Tau coefficient for two ordinal variables.
 
         Args:
-            var1 (str): The name of the first ordinal variable. This assumes that variable values
+            a_name (str): The name of the first ordinal variable. This assumes that variable values
                 have lexicographical order
-            var2 (str): The name of the second ordinal variable.This assumes that variable values
+            b_name (str): The name of the second ordinal variable.This assumes that variable values
                 have lexicographical order
 
         Returns:
             float: Kendall's Tau coefficient.
         """
-        self.validate_input(var1, var2)
-        analysis = self.kendalls_tau_cls(
-            data=self._data, a=var1, b=var2, ordinal_a=True, ordinal_b=True
+        self.validate_input(a_name, b_name)
+        analysis = self._kendalls_tau_cls(
+            data=self._data,
+            a_name=a_name,
+            b_name=b_name,
+            ordinal_a=ordinal_a,
+            ordinal_b=ordinal_b,
         )
         analysis.run()
         return analysis.result
 
-    def spearmans_rank(self, var1: str, var2: str) -> float:
+    def spearmans_rank(self, a_name: str, b_name: str) -> float:
         """
         Computes Spearman's Rank Correlation coefficient for two ordinal variables.
 
         Args:
-            var1 (str): The name of the first ordinal variable.
-            var2 (str): The name of the second ordinal variable.
+            a_name (str): The name of the first ordinal variable.
+            b_name (str): The name of the second ordinal variable.
 
         Returns:
             float: Spearman's Rank Correlation coefficient.
         """
-        self.validate_input(var1, var2)
-        analysis = self.spearmans_rank_cls(data=self._data, a=var1, b=var2)
+        self.validate_input(a_name, b_name)
+        analysis = self.spearmans_rank_cls(
+            data=self._data, a_name=a_name, b_name=b_name
+        )
         analysis.run()
         return analysis.result
 
-    def mutual_information(self, var1: str, var2: str) -> float:
+    def mutual_information(self, a_name: str, b_name: str) -> float:
         """
         Computes Mutual Information adjusted for ordinal data for two ordinal variables.
 
         Args:
-            var1 (str): The name of the first ordinal variable. This assumes that variable values
+            a_name (str): The name of the first ordinal variable. This assumes that variable values
                 have lexicographical order
-            var2 (str): The name of the second ordinal variable. This assumes that variable values
+            b_name (str): The name of the second ordinal variable. This assumes that variable values
                 have lexicographical order
 
         Returns:
             float: Mutual Information adjusted for ordinal data.
         """
-        self.validate_input(var1, var2)
+        self.validate_input(a_name, b_name)
 
         # Assign ranks to the ordinal values
-        ranks_var1 = self._data[var1].rank(method="dense")
-        ranks_var2 = self._data[var2].rank(method="dense")
+        ranks_a_name = self._data[a_name].rank(method="dense")
+        ranks_b_name = self._data[b_name].rank(method="dense")
 
         # Compute mutual information using ranked variables
-        mutual_info = mutual_info_score(ranks_var1, ranks_var2)
+        mutual_info = mutual_info_score(ranks_a_name, ranks_b_name)
 
         return mutual_info

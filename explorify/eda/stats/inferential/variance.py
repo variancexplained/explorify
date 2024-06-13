@@ -3,18 +3,18 @@
 # ================================================================================================ #
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
-# Python     : 3.10.12                                                                             #
-# Filename   : /explorify/eda/stats/inferential/independence.py                                    #
+# Python     : 3.10.10                                                                             #
+# Filename   : /explorify/eda/stats/inferential/variance.py                                        #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
-# Email      : john@variancexplained.com                                                           #
+# Email      : john.james.ai.studio@gmail.com                                                      #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Sunday June 9th 2024 11:12:14 am                                                    #
-# Modified   : Thursday June 13th 2024 11:11:50 am                                                 #
+# Created    : Wednesday June 7th 2023 11:41:00 pm                                                 #
+# Modified   : Thursday June 13th 2024 11:12:14 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
-# Copyright  : (c) 2024 John James                                                                 #
+# Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #
 from dataclasses import dataclass
 
@@ -32,13 +32,12 @@ from explorify.eda.visualize.visualizer import Visualizer
 #                                     TEST RESULT                                                  #
 # ------------------------------------------------------------------------------------------------ #
 @dataclass
-class ChiSquareIndependenceTestResult(StatTestResult):
-    name: str = f"X\u00b2 Test of Independence"  # noqa
-    dof: int = None
-    data: pd.DataFrame = None
+class LeveneTestResult(StatTestResult):
+    name: str = "Levene's Test of Equal Variances"
     a_name: str = None
     b_name: str = None
-    visualizer: Visualizer = None
+    data: pd.DataFrame = None
+    dof: tuple = None
 
     @inject
     def __post_init__(
@@ -47,41 +46,47 @@ class ChiSquareIndependenceTestResult(StatTestResult):
         self.visualizer = visualizer
 
     def plot(self) -> None:  # pragma: no cover
-        self.visualizer.x2testplot(
-            statistic=self.value,
-            dof=self.dof,
-            result=self.result,
-            alpha=self.alpha,
-        )
+        title = f"Levene test of equal variance of {self.b_name} within {self.a_name}"
+        self.visualizer.boxplot(x=self.a, y=self.b, data=self.data, title=title)
 
     @property
     def report(self) -> str:
-        return f"X\u00b2 Test of Independence\n{self.a_name.capitalize()} and {self.b_name.capitalize()}\nX\u00b2({self.dof}, N={self.data.shape[0]})={round(self.value,2)}, {self._report_pvalue(self.pvalue)}."
+        if self.pvalue > self.alpha:  # pragma: no cover
+            return f"{self.name} was conducted to test homogeniety of {self.b_name} variances among {self.a_name}. {self.name} found that {self.a_name} violated the assumption of homogeniety for the the {self.b_name} variable {self.statistic}({self.dof})={self.value},p={round(self.pvalue,4)}"
+        else:
+            return f"{self.name} was conducted to test homogeniety of {self.b_name} variances among {self.a_name}. {self.name} found that {self.a_name} was homogeneous among the {self.b_name} variable {self.statistic}({self.dof})={self.value},p={round(self.pvalue,4)}"
 
 
 # ------------------------------------------------------------------------------------------------ #
 #                                          TEST                                                    #
 # ------------------------------------------------------------------------------------------------ #
-class ChiSquareIndependenceTest(StatisticalTest):
-    """Chi-Square Test of Independence
+class LeveneTest(StatisticalTest):
+    """Perform Levene test for equal variances.
 
-    The Chi-Square test of independence is used to determine if there is a significant relationship between two nominal (categorical) variables.  The frequency of each category for one nominal variable is compared across the categories of the second nominal variable.
+    The Levene test tests the null hypothesis that all input samples are from populations with
+    equal variances.  Levene's test is an alternative to Bartlett's test bartlett in the case where
+    there are significant deviations from normality.
+
+    Args:
+        a_name: (str): Name of a categorical variable representing groups.
+        b_name: (str): Name of a numeric variable to be tested.
+        data (pd.DataFrame): DataFrame containing the columns a and b.
+        alpha (float): The level of statistical significance for inference.
     """
 
-    __id = "x2ind"
+    __id = "levene"
 
-    @inject
     def __init__(
         self,
+        a_name: str,
+        b_name: str,
         data: pd.DataFrame,
-        a_name: str = None,
-        b_name: str = None,
         alpha: float = 0.05,
     ) -> None:
         super().__init__()
-        self._data = data
         self._a_name = a_name
         self._b_name = b_name
+        self._data = data
         self._alpha = alpha
         self._profile = StatTestProfile.create(self.__id)
         self._result = None
@@ -97,24 +102,30 @@ class ChiSquareIndependenceTest(StatisticalTest):
         return self._result
 
     def run(self) -> None:
-        """Performs the statistical test and creates a result object."""
+        """Executes the Test."""
+        data_clean = self._data.dropna(subset=[self._a_name, self._b_name])[
+            [self._a_name, self._b_name]
+        ]
+        grouped_data = data_clean.groupby(self._a_name)[self._b_name]
+        groups = [group for _, group in grouped_data]
 
-        obs = stats.contingency.crosstab(
-            self._data[self._a_name], self._data[self._b_name]
+        statistic, pvalue = stats.levene(*groups)
+
+        dof = (
+            len(groups) - 1,
+            len(self._data) - len(groups),
         )
 
-        statistic, pvalue, dof, exp = stats.chi2_contingency(obs[1])
-
         # Create the result object.
-        self._result = ChiSquareIndependenceTestResult(
+        self._result = LeveneTestResult(
             H0=self._profile.H0,
-            statistic="X\u00b2",
+            statistic=self._profile.statistic,
             hypothesis=self._profile.hypothesis,
-            dof=dof,
-            value=statistic,
-            pvalue=pvalue,
-            data=self._data,
             a_name=self._a_name,
             b_name=self._b_name,
+            data=self._data,
+            dof=dof,
+            value=statistic,
             alpha=self._alpha,
+            pvalue=pvalue,
         )

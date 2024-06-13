@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday August 23rd 2023 12:15:10 am                                              #
-# Modified   : Sunday June 9th 2024 02:42:41 pm                                                    #
+# Modified   : Thursday June 13th 2024 02:54:51 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -64,7 +64,7 @@ class SummaryStats(DescriptiveStats):
             include Union[str, list[str]]):
                 A white list of data types to include in the result. Ignored for Series.
                 Here are the options:
-                - ‘all', None: All columns of the input will be included in the output.
+                - 'all', None: All columns of the input will be included in the output.
                     This departs from pandas default behavior whereby None is interpreted
                     to include all numeric columns only. This means the default
                     behavior is to analyze the dataset unless otherwise specified.
