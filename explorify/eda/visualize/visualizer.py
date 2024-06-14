@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday August 26th 2023 06:25:27 am                                               #
-# Modified   : Sunday June 9th 2024 03:20:16 pm                                                    #
+# Modified   : Thursday June 13th 2024 05:46:29 pm                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -1445,7 +1445,7 @@ class Visualizer(VisualizerABC):  # pragma: no cover
         if ax is None:
             _, ax = self._canvas.get_figaxes(figsize=figsize)
 
-        _ = sns.heatmap(
+        ax = sns.heatmap(
             data=data,
             vmin=vmin,
             vmax=vmax,

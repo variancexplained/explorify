@@ -4,28 +4,47 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /explorify/container.py                                                             #
+# Filename   : /explorify/eda/multivariate/base.py                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
-# Email      : john.james.ai.studio@gmail.com                                                      #
+# Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Saturday August 26th 2023 09:31:46 am                                               #
-# Modified   : Thursday June 13th 2024 06:21:52 pm                                                 #
+# Created    : Thursday June 13th 2024 08:31:29 pm                                                 #
+# Modified   : Thursday June 13th 2024 08:31:38 pm                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
-# Copyright  : (c) 2023 John James                                                                 #
+# Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
-"""Framework Dependency Container"""
-from dependency_injector import containers, providers
+from abc import ABC, abstractmethod
 
-from explorify.eda.visualize.visualizer import SeabornCanvas, Visualizer
+import pandas as pd
 
 
 # ------------------------------------------------------------------------------------------------ #
-#                                    VISUALIZER CONTAINER                                          #
-# ------------------------------------------------------------------------------------------------ #
-class VisualizeContainer(containers.DeclarativeContainer):
+class BaseAnalyzer(ABC):
+    """
+    Abstract base class for multivariate analysis.
 
-    canvas = providers.Factory(SeabornCanvas)
-    visualizer = providers.Factory(Visualizer, canvas=canvas)
+    Attributes:
+        data (pd.DataFrame): The dataset to be analyzed.
+    """
+
+    def __init__(self, data: pd.DataFrame) -> None:
+        """
+        Initializes the BaseAnalyzer with the given dataset.
+
+        Args:
+            data (pd.DataFrame): The dataset to be analyzed.
+        """
+        self._data = data
+
+    @abstractmethod
+    def analyze(self, *args, **kwargs) -> pd.DataFrame:
+        """
+        Abstract method to perform the analysis. Must be implemented by subclasses.
+
+        Returns:
+            pd.DataFrame: The result of the analysis.
+        """
+        pass

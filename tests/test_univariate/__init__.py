@@ -4,28 +4,15 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /explorify/container.py                                                             #
+# Filename   : /tests/test_univariate/__init__.py                                                  #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
-# Email      : john.james.ai.studio@gmail.com                                                      #
+# Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Saturday August 26th 2023 09:31:46 am                                               #
-# Modified   : Thursday June 13th 2024 06:21:52 pm                                                 #
+# Created    : Thursday June 13th 2024 06:00:20 pm                                                 #
+# Modified   : Thursday June 13th 2024 06:00:20 pm                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
-# Copyright  : (c) 2023 John James                                                                 #
+# Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
-"""Framework Dependency Container"""
-from dependency_injector import containers, providers
-
-from explorify.eda.visualize.visualizer import SeabornCanvas, Visualizer
-
-
-# ------------------------------------------------------------------------------------------------ #
-#                                    VISUALIZER CONTAINER                                          #
-# ------------------------------------------------------------------------------------------------ #
-class VisualizeContainer(containers.DeclarativeContainer):
-
-    canvas = providers.Factory(SeabornCanvas)
-    visualizer = providers.Factory(Visualizer, canvas=canvas)
