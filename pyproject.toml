@@ -28,13 +28,11 @@ classifiers = [
 ]
 
 packages = [
-    { include = "explorify", from = "src" }
+    { include = "explorify"}
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.8.1, <4.0"
-
-[tool.poetry.group.dev.dependencies]
 mkdocstrings = {version = ">=0.23", extras = ["python"]}
 mkdocs-material = "*"
 mypy = "*"
