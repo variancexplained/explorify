@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday August 26th 2023 06:25:27 am                                               #
-# Modified   : Thursday June 13th 2024 05:46:29 pm                                                 #
+# Modified   : Saturday June 15th 2024 05:10:17 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -487,6 +487,7 @@ class Visualizer(VisualizerABC):  # pragma: no cover
         title: str = None,
         figsize: bool = (12, 4),
         rotate_ticks: Tuple[str, int] = None,
+        palette: str = None,
         ax: plt.Axes = None,
         **kwargs,
     ) -> plt.Axes:
@@ -512,7 +513,7 @@ class Visualizer(VisualizerABC):  # pragma: no cover
             ax: (plt.Axes): A matplotlib Axes object. Optional. If not provide, one will be obtained from the canvas.
 
         """
-        palette = self._canvas.palette if hue is not None else "Blues_r"
+        palette = self._canvas.palette if hue is not None else None
         data = data if data is not None else self._data
         title = title or self.autotitle(x, y)
 

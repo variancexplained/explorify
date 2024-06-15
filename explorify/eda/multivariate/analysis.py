@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:37:22 pm                                                 #
-# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
+# Modified   : Saturday June 15th 2024 05:21:39 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -86,7 +86,7 @@ class ConditionalProbabilityAnalyzer(MultivariateAnalyzer):
         # Compute conditional probability
         if count_b > 0:
             return count_a_and_b / count_b
-        else:
+        else:  # pragma: no cover
             return 0  # Handle division by zero if necessary
 
 
@@ -189,7 +189,7 @@ class VIFAnalyzer(MultivariateAnalyzer):
         X = self._data.select_dtypes(include=[np.number]).dropna()
         # Exclude variables so listed.
         if exclude is not None:
-            X = X.drop(exclude)
+            X = X.drop(columns=exclude)
         # Include variables so listed.
         if include is not None:
             X = X[include]
@@ -216,7 +216,7 @@ class VIFAnalyzer(MultivariateAnalyzer):
         vif_data = self.analyze()
         title = title
         self._visualizer.barplot(
-            x="Feature", y="VIF", data=vif_data, palette=palette, title=title, **kwargs
+            x="Feature", y="VIF", data=vif_data, title=title, palette=palette, **kwargs
         )
 
 

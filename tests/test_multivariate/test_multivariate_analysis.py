@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Friday June 14th 2024 10:10:37 pm                                                   #
-# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
+# Modified   : Saturday June 15th 2024 05:12:30 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -100,6 +100,25 @@ class TestMultivariateAnalyzer:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
+    def test_covariance_analysis_plot(self, plt, reviews, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = CovarianceAnalyzer(data=reviews)
+        _ = analysis.plot()
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
     def test_correlation_analysis(self, reviews, caplog):
         start = datetime.now()
         logger.info(
@@ -121,6 +140,25 @@ class TestMultivariateAnalyzer:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
+    def test_correlation_analysis_plot(self, reviews, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = CorrelationAnalyzer(data=reviews)
+        _ = analysis.plot()
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
     def test_vif(self, reviews, caplog):
         start = datetime.now()
         logger.info(
@@ -132,6 +170,67 @@ class TestMultivariateAnalyzer:  # pragma: no cover
         result = analysis.analyze()
         assert isinstance(result, pd.DataFrame)
         logger.info(f"\nVIF Analyzer: \n{result}")
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_vif_include(self, reviews, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = VIFAnalyzer(data=reviews)
+        result = analysis.analyze(include=["rating", "vote_count"])
+        assert isinstance(result, pd.DataFrame)
+        logger.info(f"\nVIF Analyzer: \n{result}")
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_vif_exclude(self, reviews, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = VIFAnalyzer(data=reviews)
+        result = analysis.analyze(exclude=["rating"])
+        assert isinstance(result, pd.DataFrame)
+        logger.info(f"\nVIF Analyzer: \n{result}")
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_vif_plot(self, reviews, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = VIFAnalyzer(data=reviews)
+        _ = analysis.plot()
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)

@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:32:12 pm                                                 #
-# Modified   : Saturday June 15th 2024 03:26:50 am                                                 #
+# Modified   : Saturday June 15th 2024 03:52:38 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -84,16 +84,6 @@ class HierarchicalAnalyzer(MultivariateAnalyzer):
         Z = linkage(self._data, method=method, **kwargs)
         self._data["cluster"] = fcluster(Z, n_clusters, criterion="maxclust")
         return self._data
-
-    def plot(self, **kwargs) -> None:
-        """
-        Plots PCA results.
-
-        Args:
-            **kwargs: Additional arguments for plotting (optional).
-        """
-        pca_data = self.analyze()
-        self._visualizer.scatterplot(x="PC1", y="PC2", data=pca_data, **kwargs)
 
 
 # ------------------------------------------------------------------------------------------------ #

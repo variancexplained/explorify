@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:35:16 pm                                                 #
-# Modified   : Friday June 14th 2024 10:54:39 pm                                                   #
+# Modified   : Saturday June 15th 2024 03:53:32 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -21,36 +21,6 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 from explorify.eda.multivariate.base import MultivariateAnalyzer
-
-
-# ------------------------------------------------------------------------------------------------ #
-class DimensionalityReductionAnalyzerFactory:
-    """
-    Factory class to create dimensionality reduction analyzer objects.
-
-    Methods:
-        get_analyzer(method: str, data: pd.DataFrame) -> MultivariateAnalyzer:
-            Factory method to get the appropriate dimensionality reduction analyzer.
-    """
-
-    @staticmethod
-    def get_analyzer(method: str, data: pd.DataFrame) -> MultivariateAnalyzer:
-        """
-        Factory method to get the appropriate dimensionality reduction analyzer.
-
-        Args:
-            method (str): The dimensionality reduction method to use ('pca', 'tsne').
-            data (pd.DataFrame): The dataset to be analyzed.
-
-        Returns:
-            MultivariateAnalyzer: The dimensionality reduction analyzer object.
-        """
-        if method == "pca":
-            return PCAAnalyzer(data)
-        elif method == "tsne":
-            return TSNEAnalyzer(data)
-        else:
-            raise ValueError(f"Unknown method: {method}")
 
 
 # ------------------------------------------------------------------------------------------------ #

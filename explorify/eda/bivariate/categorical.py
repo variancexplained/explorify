@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Sunday June 9th 2024 10:52:53 am                                                    #
-# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
+# Modified   : Saturday June 15th 2024 05:25:32 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -429,14 +429,16 @@ class LambdaCoefficientAnalyzer(BivariateCategoricalAnalyzer):
         for i in range(contingency_table.shape[0]):
             for j in range(contingency_table.shape[1]):
                 observed_agreement += (
-                    contingency_table.iloc[i, j] * row_marginals[i] * col_marginals[j]
+                    contingency_table.iloc[i, j]
+                    * row_marginals.iloc[i]
+                    * col_marginals.iloc[j]
                 )
 
         # Calculate the expected agreement under independence assumption
         expected_agreement = 0
         for i in range(contingency_table.shape[0]):
             for j in range(contingency_table.shape[1]):
-                expected_agreement += row_marginals[i] * col_marginals[j]
+                expected_agreement += row_marginals.iloc[i] * col_marginals.iloc[j]
 
         return (observed_agreement - expected_agreement) / (1 - expected_agreement)
 

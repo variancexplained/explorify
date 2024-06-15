@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Friday June 14th 2024 08:38:01 pm                                                   #
-# Modified   : Friday June 14th 2024 09:10:09 pm                                                   #
+# Modified   : Saturday June 15th 2024 03:34:03 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -65,15 +65,15 @@ class TestEncoding:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_label_encoder(self, credit, caplog):
+    def test_label_encoder(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        enc = ALabelEncoder(data=credit)
-        result = enc.encode(columns=["Education", "Gender", "Credit Rating", "Own"])
+        enc = ALabelEncoder(data=reviews)
+        result = enc.encode(column="category")
         assert isinstance(result, pd.DataFrame)
         logger.info(result.head())
         # ---------------------------------------------------------------------------------------- #
@@ -97,6 +97,27 @@ class TestEncoding:  # pragma: no cover
         result = enc.encode(
             columns=["Education", "Gender", "Credit Rating", "Own"], target="Income"
         )
+        assert isinstance(result, pd.DataFrame)
+        logger.info(result.head())
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_target_encoder_no_columns(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        enc = ATargetEncoder(data=credit)
+        result = enc.encode(target="Income")
         assert isinstance(result, pd.DataFrame)
         logger.info(result.head())
         # ---------------------------------------------------------------------------------------- #
