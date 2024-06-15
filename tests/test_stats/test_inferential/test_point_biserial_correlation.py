@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday June 7th 2023 09:15:17 pm                                                 #
-# Modified   : Thursday June 13th 2024 11:23:28 am                                                 #
+# Modified   : Friday June 14th 2024 07:52:41 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -25,7 +25,7 @@ import pandas as pd
 import pytest
 
 from explorify.eda.stats.inferential.base import StatTestProfile
-from explorify.eda.stats.inferential.correlation import PearsonCorrelationTest
+from explorify.eda.stats.inferential.correlation import PointBiserialCorrelationTest
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ class TestPointBiserialCorrelationTest:  # pragma: no cover
         df = credit
         df["Male"] = np.where(df["Gender"] == "Male", True, False)
 
-        test = PearsonCorrelationTest(data=df, a_name="Male", b_name="Income")
+        test = PointBiserialCorrelationTest(data=df, a_name="Male", b_name="Income")
         test.run()
         assert "Pearson" in test.result.name
         assert isinstance(test.result.H0, str)
@@ -98,7 +98,9 @@ class TestPointBiserialCorrelationTest:  # pragma: no cover
         b = np.linspace(100, 10, 100)
         d = {"sample a": a, "sample b": b}
         df = pd.DataFrame(d)
-        test = PearsonCorrelationTest(data=df, a_name="sample a", b_name="sample b")
+        test = PointBiserialCorrelationTest(
+            data=df, a_name="sample a", b_name="sample b"
+        )
         test.run()
         assert "Pearson" in test.result.name
         assert isinstance(test.result.H0, str)
@@ -140,7 +142,7 @@ class TestPointBiserialCorrelationTest:  # pragma: no cover
         # ---------------------------------------------------------------------------------------- #
         b = np.linspace(100, 10, 100)
         with pytest.raises(TypeError):
-            test = PearsonCorrelationTest(b=b)
+            test = PointBiserialCorrelationTest(b=b)
             test.run()
 
         # ---------------------------------------------------------------------------------------- #

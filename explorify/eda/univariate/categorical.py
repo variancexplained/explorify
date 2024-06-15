@@ -11,42 +11,35 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday June 8th 2024 11:45:10 am                                                  #
-# Modified   : Sunday June 9th 2024 03:20:13 pm                                                    #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from dependency_injector.wiring import Provide, inject
+
+from explorify.container import VisualizeContainer
+from explorify.eda.univariate.base import UnivariateCategoricalAnalyzer
+from explorify.eda.visualize.visualizer import Visualizer
 
 
 # ------------------------------------------------------------------------------------------------ #
-class Categorical:
-    """Provides methods to perform univariate analysis on categorical data.
+#                         CATEGORICAL DESCRIPTIVE STATISTICS                                       #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateCategoricalDescriptiveStatisticsAnalyzer(UnivariateCategoricalAnalyzer):
+    """Descriptive statistics for a univariate categorical variable.
 
     Args:
         _data (pd.DataFrame): The DataFrame containing the categorical data.
-
-    Example usage:
-        >>> import pandas as pd
-        >>> from univariate import Categorical
-        >>> data = pd.DataFrame({
-        ...     'Category': ['A', 'B', 'A', 'C', 'B', 'A', 'A', 'C']
-        ... })
-        >>> categorical_analysis = Categorical(data)
-        >>> print(categorical_analysis.descriptive_statistics('Category'))
-        >>> print(categorical_analysis.frequency_distribution('Category'))
-        >>> print(categorical_analysis.diversity_indices('Category'))
-        >>> print(categorical_analysis.inequality_measures('Category'))
-        >>> print(categorical_analysis.entropy('Category'))
-        >>> print(categorical_analysis.spread_measures('Category'))
-
     """
 
     def __init__(self, data: pd.DataFrame) -> None:
         self._data = data
 
-    def descriptive_statistics(self, x: str) -> pd.DataFrame:
+    def analyze(self, x: str) -> pd.DataFrame:
         """Calculates descriptive statistics for a specific categorical column.
 
         Args:
@@ -55,12 +48,42 @@ class Categorical:
         Returns:
             pd.DataFrame: A DataFrame containing the descriptive statistics.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         desc_stats = self._data[x].describe()
         return desc_stats.to_frame()
 
-    def frequency_distribution(self, x: str, n: int = None) -> pd.Series:
-        """Calculates the frequency distribution for categorical data.
+
+# ------------------------------------------------------------------------------------------------ #
+#                               FREQUENCY ANALYSIS                                                 #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateFrequencyAnalyzer(UnivariateCategoricalAnalyzer):
+    """Calculates the frequency distribution for categorical data.
+
+    Args:
+        _data (pd.DataFrame): The DataFrame containing the categorical data.
+
+    """
+
+    @inject
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        visualizer: Visualizer = Provide[VisualizeContainer.visualizer],
+    ) -> None:
+        """
+        Initializes the UnivariateFrequencyAnalyzer class.
+
+        Args:
+            data (pd.DataFrame): The DataFrame containing the categorical data.
+            visualizer (Visualizer): An instance of Visualizer for plotting,
+                injected via dependency injection.
+        """
+        super().__init__(data=data)
+        self._visualizer = visualizer
+
+    def analyze(self, x: str, n: int = None) -> pd.DataFrame:
+        """
+        Calculates the frequency distribution for categorical data.
 
         This yields frequency distribution, including proportions and
         cumulative counts. For large categories, the method takes
@@ -70,12 +93,13 @@ class Categorical:
         Args:
             x (str): The column in the dataset containing the categorical
                 variable.
-            n (int): The number
+            n (int, optional): The number of top categories to report. If not
+                specified, the method reports all categories.
 
         Returns:
             pd.DataFrame: A DataFrame containing the frequency distribution.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         # Calculate frequency distribution
         freq = self._data[x].value_counts().reset_index()
         freq.columns = [x, "Count"]
@@ -125,8 +149,78 @@ class Categorical:
 
             return top_n
 
-    def diversity_indices(self, x: str) -> pd.Series:
-        """Calculates diversity indices for a specific categorical column.
+    def plot(
+        self, x: str, n: int, ax: plt.Axes = None, title: str = None, orient: str = "h"
+    ) -> plt.Axes:
+        """
+        Generates a bar plot of the top-n frequencies.
+
+        Args:
+            x (str): The column in the dataset containing the categorical variable.
+            n (int): The number of top categories to plot.
+            ax (plt.Axes, optional): The matplotlib axes object to plot on. If not
+                provided, a new axes object is created.
+            title (str, optional): The title of the plot.
+            orient (str, optional): The orientation of the plot, either 'h' for
+                horizontal or 'v' for vertical. Default is 'h'.
+
+        Returns:
+            plt.Axes: The matplotlib axes object with the plot.
+        """
+        frequencies = self.analyze(x=x, n=n)
+        if orient == "h":
+            return self._visualizer.barplot(
+                data=frequencies,
+                x=x,
+                y="Count",
+                ax=ax,
+                title=title,
+                rotate_ticks=["x", 45],
+            )
+        else:
+            return self._visualizer.barplot(
+                data=frequencies,
+                x="Count",
+                y=x,
+                ax=ax,
+                title=title,
+            )
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                   DIVERSITY INDICES                                              #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateDiversityAnalyzer(UnivariateCategoricalAnalyzer):
+    """Calculates the frequency distribution for categorical data.
+
+    Args:
+        _data (pd.DataFrame): The DataFrame containing the categorical data.
+
+    """
+
+    @inject
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        visualizer: Visualizer = Provide[VisualizeContainer.visualizer],
+    ) -> None:
+        """
+        Initializes the UnivariateDiversityAnalyzer class.
+
+        Args:
+            data (pd.DataFrame): The DataFrame containing the categorical data.
+            visualizer (Visualizer): An instance of Visualizer for plotting,
+                injected via dependency injection.
+        """
+        super().__init__(data=data)
+        self._visualizer = visualizer
+
+    def analyze(self, x: str) -> pd.Series:
+        """
+        Calculates diversity indices for a specific categorical column.
+
+        This method calculates Shannon Entropy and Simpson Index to measure
+        the diversity of the categorical data.
 
         Args:
             x (str): The column to be analyzed.
@@ -134,7 +228,7 @@ class Categorical:
         Returns:
             pd.Series: A Series containing the diversity indices.
         """
-        self._validate_column(x)
+        self.validate_input(x)
 
         def shannon_entropy(series):
             counts = series.value_counts()
@@ -154,8 +248,41 @@ class Categorical:
         )
         return indices
 
-    def inequality_measures(self, x: str) -> pd.Series:
-        """Calculates inequality measures for a specific categorical column.
+
+# ------------------------------------------------------------------------------------------------ #
+#                                   INEQUALITY ANALYSIS                                            #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateInequalityAnalyzer(UnivariateCategoricalAnalyzer):
+    """
+    Performs inequality analysis for categorical data.
+
+    Args:
+        _data (pd.DataFrame): The DataFrame containing the categorical data.
+    """
+
+    @inject
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        visualizer: Visualizer = Provide[VisualizeContainer.visualizer],
+    ) -> None:
+        """
+        Initializes the UnivariateInequalityAnalyzer class.
+
+        Args:
+            data (pd.DataFrame): The DataFrame containing the categorical data.
+            visualizer (Visualizer): An instance of Visualizer for plotting,
+                injected via dependency injection.
+        """
+        super().__init__(data=data)
+        self._visualizer = visualizer
+
+    def analyze(self, x: str) -> pd.Series:
+        """
+        Calculates inequality measures for a specific categorical column.
+
+        This method calculates the Gini Coefficient to measure the inequality
+        of the categorical data.
 
         Args:
             x (str): The column to be analyzed.
@@ -163,7 +290,7 @@ class Categorical:
         Returns:
             pd.Series: A Series containing the inequality measures.
         """
-        self._validate_column(x)
+        self.validate_input(x)
 
         def gini_coefficient(series):
             counts = series.value_counts()
@@ -176,8 +303,41 @@ class Categorical:
         measures = pd.Series({"Gini Coefficient": gini_coefficient(self._data[x])})
         return measures
 
-    def entropy(self, x: str) -> pd.Series:
-        """Calculates entropy for a specific categorical column.
+
+# ------------------------------------------------------------------------------------------------ #
+#                                   ENTROPY ANALYSIS                                               #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateEntropyAnalyzer(UnivariateCategoricalAnalyzer):
+    """
+    Performs entropy analysis for categorical data.
+
+    Args:
+        _data (pd.DataFrame): The DataFrame containing the categorical data.
+    """
+
+    @inject
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        visualizer: Visualizer = Provide[VisualizeContainer.visualizer],
+    ) -> None:
+        """
+        Initializes the UnivariateEntropyAnalyzer class.
+
+        Args:
+            data (pd.DataFrame): The DataFrame containing the categorical data.
+            visualizer (Visualizer): An instance of Visualizer for plotting,
+                injected via dependency injection.
+        """
+        super().__init__(data=data)
+        self._visualizer = visualizer
+
+    def analyze(self, x: str) -> pd.Series:
+        """
+        Calculates entropy for a specific categorical column.
+
+        This method calculates the Shannon Entropy to measure the uncertainty
+        or diversity of the categorical data.
 
         Args:
             x (str): The column to be analyzed.
@@ -185,7 +345,7 @@ class Categorical:
         Returns:
             pd.Series: A Series containing the entropy value.
         """
-        self._validate_column(x)
+        self.validate_input(x)
 
         def shannon_entropy(series):
             counts = series.value_counts()
@@ -195,16 +355,50 @@ class Categorical:
         entropy_value = pd.Series({"Entropy": shannon_entropy(self._data[x])})
         return entropy_value
 
-    def spread_measures(self, x: str) -> pd.Series:
-        """Calculates spread measures for a specific categorical column.
+
+# ------------------------------------------------------------------------------------------------ #
+#                                   SPREAD ANALYSIS                                                #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateSpreadAnalyzer(UnivariateCategoricalAnalyzer):
+    """
+    Performs spread analysis for categorical data.
+
+    Args:
+        _data (pd.DataFrame): The DataFrame containing the categorical data.
+    """
+
+    @inject
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        visualizer: Visualizer = Provide[VisualizeContainer.visualizer],
+    ) -> None:
+        """
+        Initializes the UnivariateSpreadAnalyzer class.
+
+        Args:
+            data (pd.DataFrame): The DataFrame containing the categorical data.
+            visualizer (Visualizer): An instance of Visualizer for plotting,
+                injected via dependency injection.
+        """
+        super().__init__(data=data)
+        self._visualizer = visualizer
+
+    def analyze(self, x: str) -> pd.Series:
+        """
+        Calculates spread measures for a specific categorical column.
+
+        This method calculates the spread of the categorical data by
+        finding the difference between the maximum and minimum counts
+        of the categories.
 
         Args:
             x (str): The column to be analyzed.
 
         Returns:
-            pd.Series: A Series containing the spread measures.
+            pd.Series: A Series containing the spread measure.
         """
-        self._validate_column(x)
+        self.validate_input(x)
 
         spread_value = pd.Series(
             {
@@ -213,23 +407,3 @@ class Categorical:
             }
         )
         return spread_value
-
-    def _validate_column(self, x: str) -> None:
-        """Validates the column to ensure it exists and is of type object, category, or string.
-
-        Args:
-            x (str): The column to be analyzed.
-
-        Raises:
-            ValueError: If the column does not exist or is not of a valid type.
-        """
-        if x not in self._data.columns:
-            raise ValueError(f"Column '{x}' not found in data.")
-        if not (
-            isinstance(self._data[x], pd.CategoricalDtype)
-            or pd.api.types.is_object_dtype(self._data[x])
-            or pd.api.types.is_string_dtype(self._data[x])
-        ):
-            raise ValueError(
-                f"Column '{x}' must be of type category, object, or string."
-            )

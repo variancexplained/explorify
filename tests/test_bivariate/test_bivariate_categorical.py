@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Sunday June 9th 2024 11:54:12 am                                                    #
-# Modified   : Thursday June 13th 2024 01:29:13 am                                                 #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -24,12 +24,14 @@ import pandas as pd
 import pytest
 
 from explorify.eda.bivariate.categorical import (
-    CategoricalBivariateAnalysis,
-    NominalNominalBivariateAnalysis,
-    NominalOrdinalBivariateAnalysis,
-    OrdinalOrdinalBivariateAnalysis,
+    ContingencyCoefficientAnalyzer,
+    ContingencyTableAnalyzer,
+    GammaCoefficientAnalyzer,
+    LambdaCoefficientAnalyzer,
+    MutualInformationAnalyzer,
+    PhiCoefficientAnalyzer,
+    ThielsUCoefficientAnalyzer,
 )
-from explorify.eda.stats.inferential.base import StatTestResult
 
 # ------------------------------------------------------------------------------------------------ #
 # pylint: disable=missing-class-docstring, line-too-long
@@ -43,7 +45,7 @@ single_line = f"\n{100 * '-'}"
 
 @pytest.mark.bivariate
 @pytest.mark.category
-class TestCategoricalBivariateAnalysis:  # pragma: no cover
+class TestBivariateCategoricalAnalyzer:  # pragma: no cover
     # ============================================================================================ #
     def test_validate_input(self, reviews, caplog):
         start = datetime.now()
@@ -52,7 +54,7 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=reviews)
+        analysis = ContingencyCoefficientAnalyzer(data=reviews)
         with pytest.raises(ValueError):
             analysis.validate_input(a_name="review_length", b_name="category")
         with pytest.raises(ValueError):
@@ -69,80 +71,17 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_contigency_table(self, reviews, caplog):
+    def test_contingency_coefficient_analysis_ordinal_nominal(self, credit, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=reviews)
-        df = analysis.contingency_table(a_name="app_name", b_name="category")
-        assert isinstance(df, pd.DataFrame)
-        logger.info(df.head())
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        analysis = ContingencyCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Education", b_name="Own", a_type="ordinal", b_type="nominal"
         )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_chisquare(self, reviews, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=reviews)
-        result = analysis.chi_square(a_name="app_name", b_name="category")
-        assert isinstance(result, StatTestResult)
-        logger.info(result.report)
-        logger.info(result)
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_cramersv(self, reviews, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=reviews)
-        result = analysis.cramers_v(a_name="app_name", b_name="category")
-        assert isinstance(result, StatTestResult)
-        logger.info(result.report)
-        logger.info(result)
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_mutual_info(self, reviews, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = CategoricalBivariateAnalysis(data=reviews)
-        result = analysis.mutual_information(a_name="app_name", b_name="category")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -154,27 +93,252 @@ class TestCategoricalBivariateAnalysis:  # pragma: no cover
         )
         logger.info(single_line)
 
-
-# ------------------------------------------------------------------------------------------------ #
-@pytest.mark.nominal
-@pytest.mark.bivariate
-@pytest.mark.category
-class TestNominalNominalBivariateAnalysis:  # pragma: no cover
     # ============================================================================================ #
-    def test_validate_input(self, credit, caplog):
+    def test_contingency_coefficient_analysis_nominal_nominal(self, reviews, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = NominalNominalBivariateAnalysis(data=credit)
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="Income", b_name="Gender")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="Gender", b_name="Income")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="bogus", b_name="Gender")
+        analysis = ContingencyCoefficientAnalyzer(data=reviews)
+        result = analysis.analyze(
+            a_name="app_name", b_name="category", a_type="nominal", b_type="nominal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_contingency_coefficient_analysis_nominal_ordinal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = ContingencyCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Own", b_name="Education", a_type="nominal", b_type="ordinal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_contingency_table(self, reviews, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = ContingencyTableAnalyzer(data=reviews)
+        result = analysis.analyze(a_name="app_name", b_name="category")
+        assert isinstance(result, pd.DataFrame)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_gamma_coefficient_nominal_ordinal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = GammaCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Own", b_name="Education", a_type="nominal", b_type="ordinal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_gamma_coefficient_ordinal_nominal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = GammaCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Education", b_name="Own", a_type="ordinal", b_type="nominal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_gamma_coefficient_ordinal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = GammaCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Education",
+            b_name="Credit Rating",
+            a_type="ordinal",
+            b_type="ordinal",
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_lambda_coefficient_ordinal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = LambdaCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Own", b_name="Education", a_type="ordinal", b_type="ordinal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_lambda_coefficient_nominal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = LambdaCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Own", b_name="Education", a_type="nominal", b_type="nominal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_lambda_coefficient_mixed(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = LambdaCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Own", b_name="Credit Rating", a_type="nominal", b_type="ordinal"
+        )
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_mutual_information(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = MutualInformationAnalyzer(data=credit)
+        result = analysis.analyze(a_name="Own", b_name="Education")
+        assert isinstance(result, float)
+        logger.info(result)
+        # ---------------------------------------------------------------------------------------- #
+        end = datetime.now()
+        duration = round((end - start).total_seconds(), 1)
+
+        logger.info(
+            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(single_line)
+
+    # ============================================================================================ #
+    def test_mutual_information_ordinal(self, credit, caplog):
+        start = datetime.now()
+        logger.info(
+            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
+        )
+        logger.info(double_line)
+        # ---------------------------------------------------------------------------------------- #
+        analysis = MutualInformationAnalyzer(data=credit)
+        result = analysis.analyze(
+            a_name="Credit Rating",
+            b_name="Education",
+            a_type="ordinal",
+            b_type="ordinal",
+        )
+        assert isinstance(result, float)
+        logger.info(result)
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -192,8 +356,8 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = NominalNominalBivariateAnalysis(data=credit)
-        result = analysis.phi_coefficient(a_name="Marital Status", b_name="Gender")
+        analysis = PhiCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(a_name="Gender", b_name="Own")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -206,16 +370,16 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_phi_coefficient_not_2x2(self, credit, caplog):
+    def test_phi_coefficient_exception(self, credit, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = NominalNominalBivariateAnalysis(data=credit)
+        analysis = PhiCoefficientAnalyzer(data=credit)
         with pytest.raises(ValueError):
-            _ = analysis.phi_coefficient(a_name="Education", b_name="Gender")
+            _ = analysis.analyze(a_name="Credit Rating", b_name="Own")
 
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
@@ -227,17 +391,15 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_contingency_coefficient(self, credit, caplog):
+    def test_thiels_u_coefficient(self, credit, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = NominalNominalBivariateAnalysis(data=credit)
-        result = analysis.contingency_coefficient(
-            a_name="Marital Status", b_name="Gender"
-        )
+        analysis = ThielsUCoefficientAnalyzer(data=credit)
+        result = analysis.analyze(a_name="Education", b_name="Own")
         assert isinstance(result, float)
         logger.info(result)
         # ---------------------------------------------------------------------------------------- #
@@ -248,225 +410,3 @@ class TestNominalNominalBivariateAnalysis:  # pragma: no cover
             f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_lambda_coefficient(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = NominalNominalBivariateAnalysis(data=credit)
-        result = analysis.lambda_coefficient(a_name="Marital Status", b_name="Gender")
-        assert isinstance(result, float)
-        logger.info(result)
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-
-@pytest.mark.ordinal_nominal
-@pytest.mark.bivariate
-@pytest.mark.category
-class TestNominalOrdinalBivariateAnalysis:  # pragma: no cover
-    # ============================================================================================ #
-    def test_validate_input(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="Income", b_name="Gender")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="Gender", b_name="Income")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="bogus", b_name="Gender")
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_gamma(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.gamma(a_name="Gender", b_name="Education")
-        assert isinstance(result, float)
-        logger.info(result)
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_lambda_coefficient(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.lambda_coefficient(a_name="Gender", b_name="Education")
-        assert isinstance(result, float)
-        logger.info(result)
-
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_theil_u(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = NominalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.theil_u(a_name="Gender", b_name="Education")
-        assert isinstance(result, float)
-        logger.info(result)
-
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-
-@pytest.mark.ordinal
-@pytest.mark.bivariate
-@pytest.mark.category
-class TestOrdinalOrdinalBivariateAnalysis:  # pragma: no cover
-    # ============================================================================================ #
-    def test_validate_input(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="Income", b_name="Gender")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="Gender", b_name="Income")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="bogus", b_name="Gender")
-        # ---------------------------------------------------------------------------------------- #
-        end = datetime.now()
-        duration = round((end - start).total_seconds(), 1)
-
-        logger.info(
-            f"\n\nCompleted {self.__class__.__name__} {inspect.stack()[0][3]} in {duration} seconds at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(single_line)
-
-    # ============================================================================================ #
-    def test_cramersv(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.cramer_v(a_name="Gender", b_name="Education")
-        assert isinstance(result, StatTestResult)
-        logger.info(result)
-
-    # ============================================================================================ #
-    def test_gamma(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.gamma(a_name="Gender", b_name="Education")
-        assert isinstance(result, float)
-        logger.info(result)
-
-    # ============================================================================================ #
-    def test_kendalls_tau(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.kendalls_tau(a_name="Gender", b_name="Education")
-        assert isinstance(result, StatTestResult)
-        logger.info(result)
-
-    # ============================================================================================ #
-    def test_spearmans_rank(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.spearmans_rank(a_name="Gender", b_name="Education")
-        assert isinstance(result, StatTestResult)
-        logger.info(result)
-
-    # ============================================================================================ #
-    def test_mutual_information(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.mutual_information(a_name="Gender", b_name="Education")
-        assert isinstance(result, float)
-        logger.info(result)
-
-    # ============================================================================================ #
-    def test_contingency_table(self, credit, caplog):
-        start = datetime.now()
-        logger.info(
-            f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
-        )
-        logger.info(double_line)
-        # ---------------------------------------------------------------------------------------- #
-        analysis = OrdinalOrdinalBivariateAnalysis(data=credit)
-        result = analysis.contingency_table(a_name="Gender", b_name="Education")
-        assert isinstance(result, pd.DataFrame)
-        logger.info(result)

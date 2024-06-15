@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Monday June 5th 2023 09:32:36 pm                                                    #
-# Modified   : Thursday June 13th 2024 11:23:28 am                                                 #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -23,7 +23,7 @@ from datetime import datetime
 import pandas as pd
 import pytest
 
-from explorify.eda.stats.inferential.association import CramersVAnalysis
+from explorify.eda.stats.inferential.association import CramersVAnalyzer
 
 # ------------------------------------------------------------------------------------------------ #
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class TestCramersV:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = CramersVAnalysis(data=credit, a_name="Gender", b_name="Education")
+        test = CramersVAnalyzer(data=credit, a_name="Gender", b_name="Education")
         test.run()
         result = test.result
         assert isinstance(result.value, float)
@@ -87,7 +87,7 @@ class TestCramersV:  # pragma: no cover
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        test = CramersVAnalysis(
+        test = CramersVAnalyzer(
             data=credit,
             a_name="Gender",
             b_name="Education",

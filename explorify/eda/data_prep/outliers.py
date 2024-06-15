@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:05:10 pm                                                 #
-# Modified   : Thursday June 13th 2024 08:19:56 pm                                                 #
+# Modified   : Friday June 14th 2024 09:26:11 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -64,6 +64,9 @@ class ZScoreOutlierHandler(BaseOutlierHandler):
             Removes outliers based on Z-score method for a specific column.
     """
 
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data)
+
     def remove_outliers(self, column: str, threshold: float = 3) -> pd.DataFrame:
         """
         Removes outliers based on Z-score method for a specific column.
@@ -88,6 +91,9 @@ class IQROutlierHandler(BaseOutlierHandler):
         remove_outliers(column: str, factor: float = 1.5) -> pd.DataFrame:
             Removes outliers based on the IQR method for a specific column.
     """
+
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data)
 
     def remove_outliers(self, column: str, factor: float = 1.5) -> pd.DataFrame:
         """
@@ -120,8 +126,11 @@ class CustomThresholdOutlierHandler(BaseOutlierHandler):
             Removes outliers based on custom thresholds for a specified column.
     """
 
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data)
+
     def remove_outliers(
-        self, column: str, lower_bound: float, upper_bound: float
+        self, column: str, lower_bound: float = None, upper_bound: float = None
     ) -> pd.DataFrame:
         """
         Removes outliers based on custom thresholds for a specified column.
@@ -134,6 +143,9 @@ class CustomThresholdOutlierHandler(BaseOutlierHandler):
         Returns:
             pd.DataFrame: The dataset with outliers removed for the specified column.
         """
-        return self._data[
-            (self._data[column] >= lower_bound) & (self._data[column] <= upper_bound)
-        ]
+        data = self._data.copy()
+        if lower_bound is not None:
+            data = data.loc[data[column] >= lower_bound]
+        if upper_bound is not None:
+            data = data.loc[data[column] <= upper_bound]
+        return data

@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday April 25th 2024 12:55:55 am                                                #
-# Modified   : Wednesday June 12th 2024 10:21:53 pm                                                #
+# Modified   : Saturday June 15th 2024 03:24:13 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -23,6 +23,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.preprocessing import StandardScaler
 
 from explorify import DataClass
 from explorify.container import VisualizeContainer
@@ -52,20 +53,9 @@ def reviews():
 
 
 # ------------------------------------------------------------------------------------------------ #
-#                                      DATACLASS                                                   #
-# ------------------------------------------------------------------------------------------------ #
-@dataclass
-class TestDataClass(DataClass):
-    name: str = "test"
-    size: int = 8329
-    length: float = 920932.98
-    dt: datetime = datetime.now()
-
-
-# ------------------------------------------------------------------------------------------------ #
 #                                         CREDIT DATA                                              #
 # ------------------------------------------------------------------------------------------------ #
-@pytest.fixture(scope="function", autouse=False)
+@pytest.fixture(scope="module", autouse=False)
 def credit():
     df = pd.read_csv(CREDIT_FP, index_col=None)
     df = df.astype(
@@ -83,12 +73,35 @@ def credit():
 
 
 # ------------------------------------------------------------------------------------------------ #
+#                                   MODEL DATA FIXTURE                                             #
+# ------------------------------------------------------------------------------------------------ #
+@pytest.fixture(scope="module", autouse=False)
+def model_data(credit):
+    """Returns encoded and scaled data."""
+    data = pd.get_dummies(data=credit, dtype=int)
+    enc = StandardScaler()
+    a1 = enc.fit_transform(data)
+    return pd.DataFrame(data=a1, columns=enc.get_feature_names_out())
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                      DATACLASS                                                   #
+# ------------------------------------------------------------------------------------------------ #
+@dataclass
+class TestDataClass(DataClass):
+    name: str = "test"
+    size: int = 8329
+    length: float = 920932.98
+    dt: datetime = datetime.now()
+
+
+# ------------------------------------------------------------------------------------------------ #
 #                              DEPENDENCY INJECTION                                                #
 # ------------------------------------------------------------------------------------------------ #
 @pytest.fixture(scope="module", autouse=True)
 def container():
     container = VisualizeContainer()
     container.init_resources()
-    container.wire(packages=["explorify.eda"])
+    container.wire(packages=["explorify"])
 
     return container

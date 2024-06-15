@@ -4,49 +4,37 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /explorify/eda/multivariate/base.py                                                 #
+# Filename   : /explorify/eda/base.py                                                              #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Thursday June 13th 2024 08:31:29 pm                                                 #
-# Modified   : Friday June 14th 2024 10:54:39 pm                                                   #
+# Created    : Thursday June 13th 2024 10:26:48 pm                                                 #
+# Modified   : Saturday June 15th 2024 03:24:32 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
-from abc import abstractmethod
+from abc import ABC
 
 import pandas as pd
+from dependency_injector.wiring import Provide, inject
 
-from explorify.eda.base import Analyzer
+from explorify.container import VisualizeContainer
+from explorify.eda.visualize.visualizer import Visualizer
 
 
 # ------------------------------------------------------------------------------------------------ #
-class MultivariateAnalyzer(Analyzer):  # pragma: no cover
-    """
-    Abstract base class for multivariate analysis.
+class Analyzer(ABC):
+    """Abstract base class for all analyses"""
 
-    Attributes:
-        data (pd.DataFrame): The dataset to be analyzed.
-    """
-
-    def __init__(self, data: pd.DataFrame) -> None:
-        """
-        Initializes the MultivariateAnalyzer with the given dataset.
-
-        Args:
-            data (pd.DataFrame): The dataset to be analyzed.
-        """
-        super().__init__(data=data)
-
-    @abstractmethod
-    def analyze(self, *args, **kwargs) -> pd.DataFrame:
-        """
-        Abstract method to perform the analysis. Must be implemented by subclasses.
-
-        Returns:
-            pd.DataFrame: The result of the analysis.
-        """
-        pass
+    @inject
+    def __init__(
+        self,
+        data: pd.DataFrame,
+        visualizer: Visualizer = Provide[VisualizeContainer.visualizer],
+    ) -> None:
+        super().__init__()
+        self._data = data
+        self._visualizer = visualizer

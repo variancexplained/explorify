@@ -4,14 +4,14 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /tests/test_bivariate/test_bivariate_numeric.py                                     #
+# Filename   : /tests/test_multivariate/test_multivariate_clustering.py                            #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
-# Created    : Sunday June 9th 2024 04:00:12 pm                                                    #
-# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
+# Created    : Friday June 14th 2024 10:51:31 pm                                                   #
+# Modified   : Saturday June 15th 2024 03:25:04 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -20,10 +20,14 @@ import inspect
 import logging
 from datetime import datetime
 
+import pandas as pd
 import pytest
 
-from explorify.eda.bivariate.numeric import BivariateRegressionAnalyzer
-from explorify.eda.regression.simple import SimpleRegressionResult
+from explorify.eda.multivariate.cluster import (
+    DBSCANAnalyzer,
+    HierarchicalAnalyzer,
+    KMeansAnalyzer,
+)
 
 # ------------------------------------------------------------------------------------------------ #
 # pylint: disable=missing-class-docstring, line-too-long
@@ -35,24 +39,21 @@ double_line = f"\n{100 * '='}"
 single_line = f"\n{100 * '-'}"
 
 
-@pytest.mark.bivariate
-@pytest.mark.numeric
-class TestBivariateNumericAnalyzer:  # pragma: no cover
+@pytest.mark.multivariate
+@pytest.mark.cluster
+class TestClustering:  # pragma: no cover
     # ============================================================================================ #
-    def test_validate_input(self, reviews, caplog):
+    def test_kmeans_clustering(self, plt, model_data, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = BivariateRegressionAnalyzer(data=reviews)
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="app_name", b_name="rating")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="rating", b_name="category")
-        with pytest.raises(ValueError):
-            analysis.validate_input(a_name="bogus", b_name="rating")
+        analyzer = KMeansAnalyzer(data=model_data)
+        result = analyzer.analyze(n_clusters=5)
+        assert isinstance(result, pd.DataFrame)
+        assert "cluster" in result.columns
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -63,19 +64,17 @@ class TestBivariateNumericAnalyzer:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_regression(self, reviews, caplog):
+    def test_hierarchical_clustering(self, model_data, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = BivariateRegressionAnalyzer(data=reviews)
-        result = analysis.analyze(a_name="review_length", b_name="vote_sum")
-        assert isinstance(result, SimpleRegressionResult)
-        assert isinstance(result.report, str)
-        logger.info(result)
-
+        analyzer = HierarchicalAnalyzer(data=model_data)
+        result = analyzer.analyze(n_clusters=5)
+        assert isinstance(result, pd.DataFrame)
+        assert "cluster" in result.columns
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)
@@ -86,18 +85,17 @@ class TestBivariateNumericAnalyzer:  # pragma: no cover
         logger.info(single_line)
 
     # ============================================================================================ #
-    def test_plot_regression(self, plt, reviews, caplog):
-        caplog.set_level(logging.INFO)
+    def test_dbscan_clustering(self, model_data, caplog):
         start = datetime.now()
         logger.info(
             f"\n\nStarted {self.__class__.__name__} {inspect.stack()[0][3]} at {start.strftime('%I:%M:%S %p')} on {start.strftime('%m/%d/%Y')}"
         )
         logger.info(double_line)
         # ---------------------------------------------------------------------------------------- #
-        analysis = BivariateRegressionAnalyzer(data=reviews)
-        _ = analysis.plot(a_name="review_length", b_name="rating")
-        plt.show()
-
+        analyzer = DBSCANAnalyzer(data=model_data)
+        result = analyzer.analyze()
+        assert isinstance(result, pd.DataFrame)
+        assert "cluster" in result.columns
         # ---------------------------------------------------------------------------------------- #
         end = datetime.now()
         duration = round((end - start).total_seconds(), 1)

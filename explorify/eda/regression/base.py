@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Tuesday August 22nd 2023 07:44:59 pm                                                #
-# Modified   : Thursday June 13th 2024 10:23:46 am                                                 #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -73,8 +73,8 @@ class RegressionResult(DataClass):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class RegressionAnalysis(ABC):
-    """Base class for Regression Analysis classes"""
+class RegressionAnalyzer(ABC):
+    """Base class for Regression Analyzer classes"""
 
     def __init__(self, io: IOService = IOService, *args, **kwargs) -> None:
         self._io = io

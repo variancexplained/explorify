@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday June 7th 2023 08:15:08 pm                                                 #
-# Modified   : Thursday June 13th 2024 11:05:27 am                                                 #
+# Modified   : Friday June 14th 2024 07:51:25 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -385,7 +385,7 @@ class PointBiserialCorrelationTest(StatisticalTest):
         **kwargs
     """
 
-    __id = "pearson"
+    __id = "pbc"
 
     def __init__(
         self,

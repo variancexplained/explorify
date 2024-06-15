@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:05:23 pm                                                 #
-# Modified   : Thursday June 13th 2024 08:22:31 pm                                                 #
+# Modified   : Friday June 14th 2024 08:36:48 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -23,7 +23,7 @@ import pandas as pd
 # ------------------------------------------------------------------------------------------------ #
 
 
-class DataPrep(ABC):
+class DataPrep(ABC):  # pragma: no cover
     """
     Abstract base class for data preparation tasks.
 
@@ -74,7 +74,7 @@ class DataPrep(ABC):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class BaseOutlierHandler(ABC):
+class BaseOutlierHandler(ABC):  # pragma: no cover
     """
     Abstract base class for data preparation tasks.
 
@@ -112,7 +112,7 @@ class BaseOutlierHandler(ABC):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class BaseEncoder(ABC):
+class BaseEncoder(ABC):  # pragma: no cover
     """
     Abstract base class for encoding categorical variables.
 

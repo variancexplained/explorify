@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Wednesday June 12th 2024 11:51:03 pm                                                #
-# Modified   : Thursday June 13th 2024 10:35:25 am                                                 #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.api as sm
 
-from explorify.eda.regression.base import RegressionAnalysis, RegressionResult
+from explorify.eda.regression.base import RegressionAnalyzer, RegressionResult
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -81,7 +81,7 @@ class SimpleRegressionResult(RegressionResult):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class SimpleRegressionAnalysis(RegressionAnalysis):
+class SimpleRegressionAnalyzer(RegressionAnalyzer):
     def __init__(
         self,
         a_name: str,

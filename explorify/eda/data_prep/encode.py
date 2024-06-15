@@ -11,11 +11,13 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:05:57 pm                                                 #
-# Modified   : Thursday June 13th 2024 08:26:48 pm                                                 #
+# Modified   : Saturday June 15th 2024 03:13:33 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
+"""Encoding Module"""
+import numpy as np
 import pandas as pd
 from category_encoders import TargetEncoder
 from sklearn.preprocessing import LabelEncoder
@@ -46,17 +48,17 @@ class EncoderFactory:
             BaseEncoder: The encoder object.
         """
         if method == "onehot":
-            return OneHotEncoder(data)
+            return AOneHotEncoder(data)
         elif method == "label":
-            return LabelEncoderHandler(data)
+            return ALabelEncoder(data)
         elif method == "target":
-            return TargetEncoderHandler(data)
+            return ATargetEncoder(data)
         else:
             raise ValueError(f"Unknown method: {method}")
 
 
 # ------------------------------------------------------------------------------------------------ #
-class OneHotEncoder(BaseEncoder):
+class AOneHotEncoder(BaseEncoder):
     """
     A class to handle one-hot encoding of categorical variables.
 
@@ -65,68 +67,84 @@ class OneHotEncoder(BaseEncoder):
             Encodes the specified columns using one-hot encoding.
     """
 
-    def encode(self, columns: list[str]) -> pd.DataFrame:
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data=data)
+
+    def encode(self, columns: list[str] = None) -> pd.DataFrame:
         """
         Encodes the specified columns using one-hot encoding.
 
         Args:
-            columns (list[str]): The columns to apply one-hot encoding to.
+            columns (list[str]): The columns to apply one-hot encoding to. Optional.
+                 If columns is None then all the columns with object, string,
+                 or category dtype will be converted.
 
         Returns:
             pd.DataFrame: The dataset with the specified columns one-hot encoded.
         """
-        return pd.get_dummies(self._data, columns=columns)
+        return pd.get_dummies(self._data, columns=columns, dtype=int)
 
 
 # ------------------------------------------------------------------------------------------------ #
-class LabelEncoderHandler(BaseEncoder):
+class ALabelEncoder(BaseEncoder):
     """
-    A class to handle label encoding of categorical variables.
+    A class to handle label encoding of categorical target variables.
 
     Methods:
         encode(columns: list[str]) -> pd.DataFrame:
             Encodes the specified columns using label encoding.
     """
 
-    def encode(self, columns: list[str]) -> pd.DataFrame:
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data=data)
+
+    def encode(self, column: str) -> pd.DataFrame:
         """
-        Encodes the specified columns using label encoding.
+        Encodes the specified column using label encoding.
 
         Args:
-            columns (list[str]): The columns to apply label encoding to.
+            column (str): The target column to encode.
 
         Returns:
-            pd.DataFrame: The dataset with the specified columns label encoded.
+            pd.DataFrame: The dataset with the specified column label encoded.
         """
         le = LabelEncoder()
-        for column in columns:
-            self._data[column] = le.fit_transform(self._data[column])
+        self._data[column] = le.fit_transform(self._data[column])
         return self._data
 
 
 # ------------------------------------------------------------------------------------------------ #
 
 
-class TargetEncoderHandler(BaseEncoder):
+class ATargetEncoder(BaseEncoder):
     """
     A class to handle target encoding of categorical variables.
+
+    Target encoding assumes a dataset with a discrete or continuous target variable.
 
     Methods:
         encode(columns: list[str], target: str) -> pd.DataFrame:
             Encodes the specified columns using target encoding.
     """
 
-    def encode(self, columns: list[str], target: str) -> pd.DataFrame:
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data=data)
+
+    def encode(self, target: str, columns: list[str] = None) -> pd.DataFrame:
         """
         Encodes the specified columns using target encoding.
 
         Args:
-            columns (list[str]): The columns to apply target encoding to.
+            columns (list[str]): The columns to apply target encoding to. Optional.
+                If columns is None, all non-numeric columns are encoded.
             target (str): The target variable for calculating means.
 
         Returns:
             pd.DataFrame: The dataset with the specified columns target encoded.
         """
         te = TargetEncoder()
+        if columns is None:
+            columns = self._data.select_dtypes(exclude=[np.number]).columns
+
         self._data[columns] = te.fit_transform(self._data[columns], self._data[target])
         return self._data

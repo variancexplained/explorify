@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:32:12 pm                                                 #
-# Modified   : Thursday June 13th 2024 08:57:12 pm                                                 #
+# Modified   : Saturday June 15th 2024 03:26:50 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -20,45 +20,12 @@ import pandas as pd
 from scipy.cluster.hierarchy import fcluster, linkage
 from sklearn.cluster import DBSCAN, KMeans
 
-from explorify.eda.multivariate.base import BaseAnalyzer
-
-
-# ------------------------------------------------------------------------------------------------ #
-class ClusteringAnalyzerFactory:
-    """
-    Factory class to create clustering analyzer objects.
-
-    Methods:
-        get_analyzer(method: str, data: pd.DataFrame) -> BaseAnalyzer:
-            Factory method to get the appropriate clustering analyzer.
-    """
-
-    @staticmethod
-    def get_analyzer(method: str, data: pd.DataFrame) -> BaseAnalyzer:
-        """
-        Factory method to get the appropriate clustering analyzer.
-
-        Args:
-            method (str): The clustering method to use ('kmeans', 'hierarchical', 'dbscan').
-            data (pd.DataFrame): The dataset to be analyzed.
-
-        Returns:
-            BaseAnalyzer: The clustering analyzer object.
-        """
-        if method == "kmeans":
-            return KMeansAnalyzer(data)
-        elif method == "hierarchical":
-            return HierarchicalAnalyzer(data)
-        elif method == "dbscan":
-            return DBSCANAnalyzer(data)
-        else:
-            raise ValueError(f"Unknown method: {method}")
-
+from explorify.eda.multivariate.base import MultivariateAnalyzer
 
 # ------------------------------------------------------------------------------------------------ #
 
 
-class KMeansAnalyzer(BaseAnalyzer):
+class KMeansAnalyzer(MultivariateAnalyzer):
     """
     A class to perform K-Means clustering analysis.
 
@@ -66,6 +33,9 @@ class KMeansAnalyzer(BaseAnalyzer):
         analyze(n_clusters: int = 3, **kwargs) -> pd.DataFrame:
             Performs K-Means clustering.
     """
+
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data)
 
     def analyze(self, n_clusters: int = 3, **kwargs) -> pd.DataFrame:
         """
@@ -79,12 +49,13 @@ class KMeansAnalyzer(BaseAnalyzer):
             pd.DataFrame: The dataset with cluster labels.
         """
         model = KMeans(n_clusters=n_clusters, **kwargs)
-        self._data["cluster"] = model.fit_predict(self._data)
+        clusters = model.fit_predict(self._data)
+        self._data["cluster"] = clusters
         return self._data
 
 
 # ------------------------------------------------------------------------------------------------ #
-class HierarchicalAnalyzer(BaseAnalyzer):
+class HierarchicalAnalyzer(MultivariateAnalyzer):
     """
     A class to perform Hierarchical clustering analysis.
 
@@ -92,6 +63,9 @@ class HierarchicalAnalyzer(BaseAnalyzer):
         analyze(n_clusters: int = 3, method: str = 'ward', **kwargs) -> pd.DataFrame:
             Performs Hierarchical clustering.
     """
+
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data)
 
     def analyze(
         self, n_clusters: int = 3, method: str = "ward", **kwargs
@@ -123,7 +97,7 @@ class HierarchicalAnalyzer(BaseAnalyzer):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class DBSCANAnalyzer(BaseAnalyzer):
+class DBSCANAnalyzer(MultivariateAnalyzer):
     """
     A class to perform DBSCAN clustering analysis.
 
@@ -131,6 +105,9 @@ class DBSCANAnalyzer(BaseAnalyzer):
         analyze(eps: float = 0.5, min_samples: int = 5, **kwargs) -> pd.DataFrame:
             Performs DBSCAN clustering.
     """
+
+    def __init__(self, data: pd.DataFrame) -> None:
+        super().__init__(data)
 
     def analyze(self, eps: float = 0.5, min_samples: int = 5, **kwargs) -> pd.DataFrame:
         """
@@ -147,15 +124,3 @@ class DBSCANAnalyzer(BaseAnalyzer):
         model = DBSCAN(eps=eps, min_samples=min_samples, **kwargs)
         self._data["cluster"] = model.fit_predict(self._data)
         return self._data
-
-    def plot(self, **kwargs) -> None:
-        """
-        Plots clustering results.
-
-        Args:
-            **kwargs: Additional arguments for plotting (optional).
-        """
-        cluster_labels = self.analyze()
-        self._visualizer.scatterplot(
-            x=self._data.index, y="Cluster", data=pd.DataFrame(cluster_labels), **kwargs
-        )

@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Friday September 29th 2023 11:52:02 pm                                              #
-# Modified   : Thursday June 13th 2024 11:11:03 am                                                 #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -26,7 +26,7 @@ from dependency_injector.wiring import Provide, inject
 from scipy import stats
 
 from explorify.container import VisualizeContainer
-from explorify.eda.stats.inferential.base import StatAnalysis, StatTestResult
+from explorify.eda.stats.inferential.base import StatAnalyzer, StatTestResult
 from explorify.eda.visualize.visualizer import Visualizer
 
 
@@ -76,7 +76,7 @@ class KendallsTauTestResult(StatTestResult):
 # ------------------------------------------------------------------------------------------------ #
 #                                   CRAMERS V ANALYSIS                                             #
 # ------------------------------------------------------------------------------------------------ #
-class KendallsTauTest(StatAnalysis):
+class KendallsTauTest(StatAnalyzer):
     """Calculate Kendall's tau, a correlation measure for ordinal data.
 
     Kendall's tau is a measure of the correspondence between two rankings. Values close to 1 indicate
@@ -205,10 +205,10 @@ class CramersV(StatTestResult):
 # ------------------------------------------------------------------------------------------------ #
 #                                   CRAMERS V ANALYSIS                                             #
 # ------------------------------------------------------------------------------------------------ #
-class CramersVAnalysis(StatAnalysis):
-    """Cramer's V Analysis of the Association between two Nominal Variables.
+class CramersVAnalyzer(StatAnalyzer):
+    """Cramer's V Analyzer of the Association between two Nominal Variables.
 
-    The CramersVAnalysis class provides the association between two nominal variables.
+    The CramersVAnalyzer class provides the association between two nominal variables.
 
     Args:
         data (pd.DataFrame): The DataFrame containing the variables of interest.

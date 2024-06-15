@@ -4,141 +4,158 @@
 # Project    : Explorify                                                                           #
 # Version    : 0.1.0                                                                               #
 # Python     : 3.10.12                                                                             #
-# Filename   : /numeric.py                                                                         #
+# Filename   : /explorify/eda/univariate/numeric.py                                                #
 # ------------------------------------------------------------------------------------------------ #
 # Author     : John James                                                                          #
 # Email      : john@variancexplained.com                                                           #
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday June 8th 2024 04:29:10 pm                                                  #
-# Modified   : Saturday June 8th 2024 05:04:12 pm                                                  #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
 # ================================================================================================ #
 """Univariate Numeric Module"""
 
-
-import pandas as pd
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import scipy.stats as stats
+
+from explorify.eda.univariate.base import UnivariateNumericAnalyzer
+
+
 # ------------------------------------------------------------------------------------------------ #
-class Numeric:
+#                               NUMERIC DESCRIPTIVE STATISTICS                                     #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateNumericDescriptiveStatistics(UnivariateNumericAnalyzer):
     """
-    A class for performing various univariate analyses on numeric data.
+    Provides univariate descriptive statistics for numeric variables.
 
-    Attributes:
-    -----------
-    data : pd.DataFrame
-        The DataFrame containing the numeric data for analysis.
+    Args:
+        data (pd.DataFrame): The DataFrame containing the numeric data for analysis.
 
-    Methods:
-    --------
-    descriptive_statistics(x: str) -> pd.DataFrame
-        Calculate descriptive statistics including mean, median, mode, range,
-        standard deviation, skewness, kurtosis, and quantiles for a specified column.
-
-    variance(x: str) -> float
-        Calculate the variance of the specified column.
-
-    iqr(x: str) -> float
-        Calculate the interquartile range of the specified column.
-
-    mad(x: str) -> float
-        Calculate the mean absolute deviation of the specified column.
-
-    coefficient_of_variation(x: str) -> float
-        Calculate the coefficient of variation of the specified column.
-
-    standard_error(x: str) -> float
-        Calculate the standard error of the mean of the specified column.
-
-    Example Usage:
-    --------------
-    >>> data = pd.DataFrame({'A': [1, 2, 3, 4, 5]})
-    >>> nu = NumericUnivariate(data)
-    >>> nu.descriptive_statistics('A')
-       count  mean  std  min  25%  50%  75%  max  range  skewness  kurtosis
-    A    5.0   3.0  1.581139  1.0  2.0  3.0  4.0  5.0    4.0       0.0       -1.3
     """
 
     def __init__(self, data: pd.DataFrame):
-        """
-        Initialize the NumericUnivariate object with a DataFrame.
+        super().__init__(data=data)
 
-        Args:
-        -----
-        data : pd.DataFrame
-            The DataFrame containing the numeric data for analysis.
-        """
-        self._data = data
-
-    def descriptive_statistics(self, x: str) -> pd.DataFrame:
+    def analyze(self, x: str) -> pd.DataFrame:
         """
         Calculate descriptive statistics including mean, median, mode, range,
         standard deviation, skewness, kurtosis, and quantiles for a specified column.
 
         Args:
-        -----
-        x : str
-            The column name of the numeric data to analyze.
+            x (str): The column name of the numeric data to analyze.
 
         Returns:
         --------
         pd.DataFrame
             A DataFrame containing the descriptive statistics.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         series = self._data[x]
-        df = series.describe(percentiles=[.25, .5, .75]).to_frame().T
+        df = series.describe(percentiles=[0.25, 0.5, 0.75]).to_frame().T
         df["variance"] = self._data[x].var()
-        df['range'] = df['max'] - df['min']
-        df['skewness'] = stats.skew(series)
-        df['kurtosis'] = stats.kurtosis(series)
+        df["range"] = df["max"] - df["min"]
+        df["skewness"] = stats.skew(series)
+        df["kurtosis"] = stats.kurtosis(series)
 
         # Mode handling
         mode_result = stats.mode(series)
-        df['mode'] = mode_result.mode if mode_result.count > 0 else np.nan
+        df["mode"] = mode_result.mode if mode_result.count > 0 else np.nan
 
         return df.T
 
-    def iqr(self, x: str) -> float:
+
+# ------------------------------------------------------------------------------------------------ #
+#                             INTER-QUARTILE RANGE ANALYSIS                                        #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateIQRAnalyzer(UnivariateNumericAnalyzer):
+    """
+    Performs Interquartile Range (IQR) analysis for numerical data.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing the numerical data.
+    """
+
+    def __init__(self, data: pd.DataFrame):
+        super().__init__(data=data)
+
+    def analyze(self, x: str) -> float:
         """
         Calculate the interquartile range of the specified column.
 
         Args:
-        -----
-        x : str
-            The column name of the numeric data to analyze.
+            x (str): The column name of the numeric data to analyze.
 
         Returns:
-        --------
-        float
-            The interquartile range of the data.
+            float: The interquartile range of the data.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         series = self._data[x]
         return stats.iqr(series)
 
-    def mad(self, x: str) -> float:
+    def plot(self, x: str, title: str = None, ax: plt.Axes = None) -> plt.Axes:
+        """
+        Generate a boxplot for the specified column.
+
+        Args:
+            x (str): The column name of the numeric data to plot.
+            title (str, optional): The title of the plot. Default is None.
+            ax (plt.Axes, optional): The matplotlib axes object to plot on. If not provided, a new axes object is created.
+
+        Returns:
+            plt.Axes: The matplotlib axes object with the plot.
+        """
+        return self._visualizer.boxplot(data=self._data, x=x, ax=ax, title=title)
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                             MEDIAN ABSOLUTE DEVIATION ANALYSIS                                   #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateMADAnalyzer(UnivariateNumericAnalyzer):
+    """
+    Performs Mean Absolute Deviation (MAD) analysis for numerical data.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing the numerical data.
+    """
+
+    def __init__(self, data: pd.DataFrame):
+        super().__init__(data=data)
+
+    def analyze(self, x: str) -> float:
         """
         Calculate the mean absolute deviation of the specified column.
 
         Args:
-        -----
-        x : str
-            The column name of the numeric data to analyze.
+            x (str): The column name of the numeric data to analyze.
 
         Returns:
-        --------
-        float
-            The mean absolute deviation of the data.
+            float: The mean absolute deviation of the data.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         series = self._data[x]
         return np.mean(np.abs(series - np.mean(series)))
 
-    def coefficient_of_variation(self, x: str) -> float:
+
+# ------------------------------------------------------------------------------------------------ #
+#                           COEFFICIENT OF VARIATION ANALYSIS                                      #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateCoefficientVariationAnalyzer(UnivariateNumericAnalyzer):
+    """
+    Calculate the coefficient of variation of the specified column.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing the numerical data.
+    """
+
+    def __init__(self, data: pd.DataFrame):
+        super().__init__(data=data)
+
+    def analyze(self, x: str) -> float:
         """
         Calculate the coefficient of variation of the specified column.
 
@@ -152,13 +169,28 @@ class Numeric:
         float
             The coefficient of variation of the data, expressed as a percentage.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         series = self._data[x]
         mean = np.mean(series)
         std_dev = np.std(series, ddof=1)
         return (std_dev / mean) * 100
 
-    def standard_error(self, x: str) -> float:
+
+# ------------------------------------------------------------------------------------------------ #
+#                                STANDARD ERROR ANALYSIS                                           #
+# ------------------------------------------------------------------------------------------------ #
+class UnivariateStdErrorAnalyzer(UnivariateNumericAnalyzer):
+    """
+    Calculate the standard error of the mean of the specified column.
+
+    Args:
+        data (pd.DataFrame): The DataFrame containing the numerical data.
+    """
+
+    def __init__(self, data: pd.DataFrame):
+        super().__init__(data=data)
+
+    def analyze(self, x: str) -> float:
         """
         Calculate the standard error of the mean of the specified column.
 
@@ -172,26 +204,7 @@ class Numeric:
         float
             The standard error of the mean of the data.
         """
-        self._validate_column(x)
+        self.validate_input(x)
         series = self._data[x]
         std_dev = np.std(series, ddof=1)
         return std_dev / np.sqrt(len(series))
-
-    def _validate_column(self, x: str) -> None:
-        """
-        Validate that the specified column exists in the DataFrame and is numeric.
-
-        Args:
-        -----
-        x : str
-            The column name to validate.
-
-        Raises:
-        -------
-        ValueError:
-            If the column does not exist in the DataFrame or is not numeric.
-        """
-        if x not in self._data.columns:
-            raise ValueError(f"Column '{x}' does not exist in the DataFrame.")
-        if not pd.api.types.is_numeric_dtype(self._data[x]):
-            raise ValueError(f"Column '{x}' is not numeric.")

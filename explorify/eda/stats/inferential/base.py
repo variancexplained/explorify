@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Tuesday August 22nd 2023 07:44:59 pm                                                #
-# Modified   : Thursday June 13th 2024 11:08:47 am                                                 #
+# Modified   : Friday June 14th 2024 10:54:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -94,7 +94,7 @@ class StatisticalTest(ABC):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class StatAnalysis(ABC):
+class StatAnalyzer(ABC):
     """Base class for Statistical Measurer classes"""
 
     def __init__(self, io: IOService = IOService, *args, **kwargs) -> None:

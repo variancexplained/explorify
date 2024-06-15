@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday June 13th 2024 08:35:16 pm                                                 #
-# Modified   : Thursday June 13th 2024 08:36:49 pm                                                 #
+# Modified   : Friday June 14th 2024 10:54:39 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -20,7 +20,7 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
-from explorify.eda.multivariate.base import BaseAnalyzer
+from explorify.eda.multivariate.base import MultivariateAnalyzer
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -29,12 +29,12 @@ class DimensionalityReductionAnalyzerFactory:
     Factory class to create dimensionality reduction analyzer objects.
 
     Methods:
-        get_analyzer(method: str, data: pd.DataFrame) -> BaseAnalyzer:
+        get_analyzer(method: str, data: pd.DataFrame) -> MultivariateAnalyzer:
             Factory method to get the appropriate dimensionality reduction analyzer.
     """
 
     @staticmethod
-    def get_analyzer(method: str, data: pd.DataFrame) -> BaseAnalyzer:
+    def get_analyzer(method: str, data: pd.DataFrame) -> MultivariateAnalyzer:
         """
         Factory method to get the appropriate dimensionality reduction analyzer.
 
@@ -43,7 +43,7 @@ class DimensionalityReductionAnalyzerFactory:
             data (pd.DataFrame): The dataset to be analyzed.
 
         Returns:
-            BaseAnalyzer: The dimensionality reduction analyzer object.
+            MultivariateAnalyzer: The dimensionality reduction analyzer object.
         """
         if method == "pca":
             return PCAAnalyzer(data)
@@ -54,9 +54,9 @@ class DimensionalityReductionAnalyzerFactory:
 
 
 # ------------------------------------------------------------------------------------------------ #
-class PCAAnalyzer(BaseAnalyzer):
+class PCAAnalyzer(MultivariateAnalyzer):
     """
-    A class to perform Principal Component Analysis (PCA) for dimensionality reduction.
+    A class to perform Principal Component Analyzer (PCA) for dimensionality reduction.
 
     Methods:
         analyze(n_components: int = 2, **kwargs) -> pd.DataFrame:
@@ -65,7 +65,7 @@ class PCAAnalyzer(BaseAnalyzer):
 
     def analyze(self, n_components: int = 2, **kwargs) -> pd.DataFrame:
         """
-        Performs Principal Component Analysis (PCA).
+        Performs Principal Component Analyzer (PCA).
 
         Args:
             n_components (int): Number of components to keep. Defaults to 2.
@@ -82,7 +82,7 @@ class PCAAnalyzer(BaseAnalyzer):
 
 
 # ------------------------------------------------------------------------------------------------ #
-class TSNEAnalyzer(BaseAnalyzer):
+class TSNEAnalyzer(MultivariateAnalyzer):
     """
     A class to perform t-Distributed Stochastic Neighbor Embedding (t-SNE) for dimensionality reduction.
 
