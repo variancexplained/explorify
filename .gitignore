@@ -10,7 +10,6 @@ __pycache__/
 notes
 
 # Data
-**/*.csv
 **/*.pkl
 
 # Distribution / packaging

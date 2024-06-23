@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday April 25th 2024 12:55:55 am                                                #
-# Modified   : Saturday June 15th 2024 05:15:00 am                                                 #
+# Modified   : Sunday June 23rd 2024 07:20:40 pm                                                   #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -37,8 +37,9 @@ collect_ignore_glob = ["tests/data/*.*"]
 # ------------------------------------------------------------------------------------------------ #
 logging.getLogger("matplotlib").setLevel(logging.WARNING)
 # ------------------------------------------------------------------------------------------------ #
-CREDIT_FP = "tests/data/Credit Score Classification Dataset.csv"
+CREDIT_FP = "tests/data/credit.csv"
 CASES_FP = "tests/data/calc_cases.csv"
+CATEGORY_FP = "tests/data/categories.csv"
 
 
 # ------------------------------------------------------------------------------------------------ #
@@ -67,6 +68,22 @@ def credit():
             "Marital Status": "object",
             "Credit Rating": "category",
             "Education": "category",
+        }
+    )
+    return df
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                       CATEGORY DATA                                              #
+# ------------------------------------------------------------------------------------------------ #
+@pytest.fixture(scope="module", autouse=False)
+def categories():
+    df = pd.read_csv(CATEGORY_FP, index_col=None)
+    df = df.astype(
+        {
+            "Category": "category",
+            "Pct Active Apps": float,
+            "Selected": str,
         }
     )
     return df

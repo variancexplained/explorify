@@ -483,10 +483,12 @@ class Visualizer(VisualizerABC):  # pragma: no cover
         x: str = None,
         y: str = None,
         hue: str = None,
-        orient: str = None,
+        orient: str = "h",
         title: str = None,
-        figsize: bool = (12, 4),
+        figsize: tuple = (12, 4),
         rotate_ticks: Tuple[str, int] = None,
+        legend_loc: str = "upper right",
+        show_values: bool = True,
         palette: str = None,
         ax: plt.Axes = None,
         **kwargs,
@@ -546,8 +548,15 @@ class Visualizer(VisualizerABC):  # pragma: no cover
             _ = ax.set_title(title)
 
         if hue is not None:
-            plt.legend(loc="upper right")
+            plt.legend(loc=legend_loc)
 
+        if show_values:
+            if orient == "h":
+                for i, v in enumerate(data[y]):
+                    ax.text(i, v + 0.02, v, ha="center")
+            else:
+                for i, v in enumerate(data[x]):
+                    ax.text(v + 0.02, i, v, va="center")
         return ax
 
     def pareto(
