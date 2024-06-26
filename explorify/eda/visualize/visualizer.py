@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Saturday August 26th 2023 06:25:27 am                                               #
-# Modified   : Saturday June 15th 2024 05:10:17 am                                                 #
+# Modified   : Wednesday June 26th 2024 12:31:19 pm                                                #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -483,12 +483,11 @@ class Visualizer(VisualizerABC):  # pragma: no cover
         x: str = None,
         y: str = None,
         hue: str = None,
-        orient: str = "h",
+        orient: str = None,
         title: str = None,
-        figsize: tuple = (12, 4),
+        figsize: bool = (12, 4),
         rotate_ticks: Tuple[str, int] = None,
         legend_loc: str = "upper right",
-        show_values: bool = True,
         palette: str = None,
         ax: plt.Axes = None,
         **kwargs,
@@ -512,6 +511,7 @@ class Visualizer(VisualizerABC):  # pragma: no cover
             title (str): Title for the plot. Optional
             figsize (tuple): Size of figure in inches. Ignored if ax is provided.
             rotate_ticks (Tuple[str,int]): Tuple containing the axis and degrees of rotation. Default is None
+            legend_loc (str): Location of legend. Default = "upper right".
             ax: (plt.Axes): A matplotlib Axes object. Optional. If not provide, one will be obtained from the canvas.
 
         """
@@ -550,13 +550,6 @@ class Visualizer(VisualizerABC):  # pragma: no cover
         if hue is not None:
             plt.legend(loc=legend_loc)
 
-        if show_values:
-            if orient == "h":
-                for i, v in enumerate(data[y]):
-                    ax.text(i, v + 0.02, v, ha="center")
-            else:
-                for i, v in enumerate(data[x]):
-                    ax.text(v + 0.02, i, v, va="center")
         return ax
 
     def pareto(

@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Sunday June 23rd 2024 06:56:39 pm                                                   #
-# Modified   : Sunday June 23rd 2024 07:33:38 pm                                                   #
+# Modified   : Wednesday June 26th 2024 11:18:22 am                                                #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -49,8 +49,8 @@ class TestBarPlot:  # pragma: no cover
         viz.barplot(
             data=categories,
             orient="h",
-            x="Category",
-            y="Pct Active Apps",
+            y="Category",
+            x="Pct Active Apps",
             show_values=True,
             hue="Selected",
             figsize=(12, 8),
@@ -78,8 +78,8 @@ class TestBarPlot:  # pragma: no cover
         viz.barplot(
             data=categories,
             orient="h",
-            x="Category",
-            y="Pct Active Apps",
+            y="Category",
+            x="Pct Active Apps",
             show_values=False,
             hue="Selected",
             figsize=(12, 8),

@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday April 25th 2024 12:55:55 am                                                #
-# Modified   : Sunday June 23rd 2024 07:20:40 pm                                                   #
+# Modified   : Wednesday June 26th 2024 11:33:47 am                                                #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -81,7 +81,7 @@ def categories():
     df = pd.read_csv(CATEGORY_FP, index_col=None)
     df = df.astype(
         {
-            "Category": "category",
+            "Category": "str",
             "Pct Active Apps": float,
             "Selected": str,
         }
