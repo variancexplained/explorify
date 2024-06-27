@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Thursday April 25th 2024 12:55:55 am                                                #
-# Modified   : Wednesday June 26th 2024 11:33:47 am                                                #
+# Modified   : Thursday June 27th 2024 01:22:17 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2024 John James                                                                 #
@@ -84,6 +84,23 @@ def categories():
             "Category": "str",
             "Pct Active Apps": float,
             "Selected": str,
+        }
+    )
+    return df
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                       CATEGORY DATA                                              #
+# ------------------------------------------------------------------------------------------------ #
+@pytest.fixture(scope="module", autouse=False)
+def apps_by_category():
+    fp = "tests/data/apps_by_category.pkl"
+    df = IOService.read(fp)
+    df = df.astype(
+        {
+            "Category": "str",
+            "Expected": int,
+            "Actual": int,
         }
     )
     return df

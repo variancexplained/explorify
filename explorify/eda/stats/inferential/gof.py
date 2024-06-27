@@ -11,12 +11,13 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Tuesday June 6th 2023 01:45:05 am                                                   #
-# Modified   : Thursday June 13th 2024 11:37:33 am                                                 #
+# Modified   : Thursday June 27th 2024 01:34:15 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
 # ================================================================================================ #
 from dataclasses import dataclass
+from typing import Optional
 
 import pandas as pd
 from dependency_injector.wiring import Provide, inject
@@ -148,5 +149,161 @@ class KSTest(StatisticalTest):
             data=self._data,
             n=n,
             advisory=advisory,
+            alpha=self._alpha,
+        )
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                     TEST RESULT                                                  #
+# ------------------------------------------------------------------------------------------------ #
+@dataclass
+class ChiSquareGOFTestResult(StatTestResult):
+    """Encapsulates the hypothesis test results."""
+
+    name: str = "Chisquare Goodness of Fit Test"
+    categorical_variable: str = None
+    f_actual: str = None
+    f_exp: str = None
+    data: pd.DataFrame = None
+    n: int = None
+    dof: int = None
+    n: int = None
+
+    @inject
+    def __post_init__(
+        self, visualizer: Visualizer = Provide[VisualizeContainer.visualizer]
+    ) -> None:
+        self.visualizer = visualizer
+
+    def plot(self, title: str = None) -> None:  # pragma: no cover
+        title = (
+            title
+            or f"X\u00b2 Goodness of Fit Plot\nX\u00b2({self.dof}, N={self.n}) = {self._report_statistic(statistic=self.value)}, p={self._report_pvalue(pvalue=self.pvalue)}"
+        )
+        self.visualizer.x2testplot(
+            statistic=self.value,
+            dof=self.dof,
+            alpha=self.alpha,
+            title=title,
+        )
+
+    @property
+    def report(self) -> str:
+        """Reports the result in APA style."""
+        if self.pvalue > self.alpha:
+            result = "was"
+        else:
+            result = "was not"
+        report = f"A X\u00b2 Goodness of Fit test was performed to evaluate whether the distribution of {self.categorical_variable} followed that of the general population. The distribution of {self.categorical_variable} {result} signficantly different from that of the general population, X\u00b2({self.dof}, N={self.n}) = {self._report_statistic(statistic=self.value)}, p={self._report_pvalue(pvalue=self.pvalue)}"
+        return report
+
+
+# ------------------------------------------------------------------------------------------------ #
+#                                          TEST                                                    #
+# ------------------------------------------------------------------------------------------------ #
+class ChiSquareGOFTest(StatisticalTest):
+    """
+    Perform a Chi-Square Goodness of Fit (GOF) test for categorical variables
+    to assess whether the observed distribution matches the expected distribution.
+
+
+    Properties:
+        profile (StatTestProfile): Returns the statistical test profile.
+        result (Optional[ChiSquareGOFTestResult]): Returns the result object
+            of the Chi-Square GOF test.
+
+    Methods:
+        run() -> None:
+            Performs the Chi-Square GOF test based on the specified parameters.
+            Calculates chi-square statistic and p-value, and creates a result object.
+    Args:
+        categorical_variable (str): Name of the categorical variable being tested.
+        f_actual (str): Name of the column in `data` containing actual frequencies or counts.
+        f_exp (str): Name of the column in `data` containing expected frequencies or counts.
+        data (pd.DataFrame): DataFrame containing the data for the test.
+        normalize_to_observed_freq (bool): Flag indicating whether to normalize expected
+            and actual frequencies to proportions.
+        alpha (float, optional): Significance level for the test (default is 0.05).
+
+    Notes:
+        This class assumes the use of scipy.stats.chisquare for computing the test statistics.
+        The `run()` method calculates expected and actual counts or proportions,
+        performs the chi-square test, and creates a `ChiSquareGOFTestResult` object with
+        relevant statistical information.
+    """
+
+    __id = "x2gof"
+
+    def __init__(
+        self,
+        categorical_variable: str,
+        f_actual: str,
+        f_exp: str,
+        data: pd.DataFrame,
+        normalize_to_observed_freq: bool,
+        alpha: float = 0.05,
+    ) -> None:
+        """
+        Initializes the ChiSquareGOFTest instance."""
+        super().__init__()
+        self._categorical_variable = categorical_variable
+        self._f_actual = f_actual
+        self._f_exp = f_exp
+        self._data = data
+        self._normalize_to_observed_freq = normalize_to_observed_freq
+        self._alpha = alpha
+        self._profile = StatTestProfile.create(self.__id)
+        self._result = None
+
+    @property
+    def profile(self) -> StatTestProfile:
+        """Returns the statistical test profile."""
+        return self._profile
+
+    @property
+    def result(self) -> Optional[ChiSquareGOFTestResult]:
+        """Returns the result object of the Chi-Square GOF test."""
+        return self._result
+
+    def run(self) -> None:
+        """
+        Performs the Chi-Square GOF test based on the specified parameters.
+        Calculates chi-square statistic and p-value, and creates a result object.
+        """
+        if self._normalize_to_observed_freq:
+            expected_proportions = (
+                self._data[self._f_exp] / self._data[self._f_exp].sum()
+            )
+            actual_proportions = (
+                self._data[self._f_actual] / self._data[self._f_actual].sum()
+            )
+            total_count = self._data[self._f_actual].sum()
+
+            actual_counts = actual_proportions * total_count
+            expected_counts = expected_proportions * total_count
+
+            x2, p_value = stats.chisquare(f_obs=actual_counts, f_exp=expected_counts)
+
+        else:
+            x2, p_value = stats.chisquare(
+                f_obs=self._data[self._f_actual], f_exp=self._data[self._f_exp]
+            )
+
+        dof = len(self._data[self._f_exp]) - 1
+        n = self._data[self._f_actual].sum()
+
+        # Create the result object.
+        self._result = ChiSquareGOFTestResult(
+            H0=self._profile.H0,
+            statistic=self._profile.statistic,
+            hypothesis=self._profile.hypothesis,
+            value=x2,
+            pvalue=p_value,
+            categorical_variable=self._categorical_variable,
+            f_actual=self._f_actual,
+            f_exp=self._f_exp,
+            dof=dof,
+            n=n,
+            data=self._data,
             alpha=self._alpha,
         )
