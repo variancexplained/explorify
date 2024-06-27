@@ -11,7 +11,7 @@
 # URL        : https://github.com/variancexplained/explorify                                       #
 # ------------------------------------------------------------------------------------------------ #
 # Created    : Tuesday June 6th 2023 01:45:05 am                                                   #
-# Modified   : Thursday June 27th 2024 01:34:15 am                                                 #
+# Modified   : Thursday June 27th 2024 01:43:54 am                                                 #
 # ------------------------------------------------------------------------------------------------ #
 # License    : MIT License                                                                         #
 # Copyright  : (c) 2023 John James                                                                 #
@@ -191,9 +191,9 @@ class ChiSquareGOFTestResult(StatTestResult):
     def report(self) -> str:
         """Reports the result in APA style."""
         if self.pvalue > self.alpha:
-            result = "was"
-        else:
             result = "was not"
+        else:
+            result = "was"
         report = f"A X\u00b2 Goodness of Fit test was performed to evaluate whether the distribution of {self.categorical_variable} followed that of the general population. The distribution of {self.categorical_variable} {result} signficantly different from that of the general population, X\u00b2({self.dof}, N={self.n}) = {self._report_statistic(statistic=self.value)}, p={self._report_pvalue(pvalue=self.pvalue)}"
         return report
 

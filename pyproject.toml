@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "explorify"
-version = "0.1.0"
+version = "0.1.1"
 description = "Explorify: Your modular solution for comprehensive data exploration. Dive deep with a suite of statistical techniques, tests, and visualizations designed for flexibility and ease of use."
 authors = [
     "John James <john@variancexplained.com>",
